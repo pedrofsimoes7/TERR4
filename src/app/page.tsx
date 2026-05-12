@@ -1,13 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Check, Shield, Timer, Weight } from "lucide-react";
-import { featuredProduct, products } from "@/data/products";
+import { getProducts } from "@/lib/products";
 import { Hero } from "@/components/sections/hero";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ui/product-card";
 import { Reveal } from "@/components/motion/reveal";
 
-export default function Home() {
+export default async function Home() {
+  const products = await getProducts();
+  const featuredProduct = products.find((product) => product.slug === "terr4-start") ?? products[0];
+
   return (
     <main>
       <Hero />
