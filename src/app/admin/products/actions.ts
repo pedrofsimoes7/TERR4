@@ -4,7 +4,7 @@ import { ProductStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
-export async function archiveProductAction(formData: FormData) {
+export async function activateProductAction(formData: FormData) {
   const id = String(formData.get("id") || "");
 
   if (!id) return;
@@ -12,7 +12,7 @@ export async function archiveProductAction(formData: FormData) {
   await prisma.product.update({
     where: { id },
     data: {
-      status: ProductStatus.DRAFT,
+      status: ProductStatus.AVAILABLE,
     },
   });
 

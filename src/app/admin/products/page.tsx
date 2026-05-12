@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
-import { archiveProductAction } from "./actions";
+import { activateProductAction, archiveProductAction } from "./actions";
 
 export default async function AdminProductsPage() {
   const products = await prisma.product.findMany({
@@ -93,15 +93,27 @@ export default async function AdminProductsPage() {
                     Editar
                   </Link>
 
-                  <form action={archiveProductAction}>
-                    <input type="hidden" name="id" value={product.id} />
-                    <button
-                      type="submit"
-                      className="rounded-full border border-white/15 px-4 py-2 text-sm font-bold text-white/70 hover:bg-red-500 hover:text-white"
-                    >
-                      Arquivar
-                    </button>
-                  </form>
+                        {product.status === "DRAFT" ? (
+                            <form action={activateProductAction}>
+                                <input type="hidden" name="id" value={product.id} />
+                                <button
+                                    type="submit"
+                                    className="rounded-full border border-white/15 px-4 py-2 text-sm font-bold text-white/70 hover:bg-emerald-500 hover:text-white"
+                                >
+                                    Reativar
+                                </button>
+                            </form>
+                        ) : (
+                            <form action={archiveProductAction}>
+                                <input type="hidden" name="id" value={product.id} />
+                                <button
+                                    type="submit"
+                                    className="rounded-full border border-white/15 px-4 py-2 text-sm font-bold text-white/70 hover:bg-red-500 hover:text-white"
+                                >
+                                    Arquivar
+                                </button>
+                            </form>
+                        )}
                 </div>
               </div>
             ))}
