@@ -1,27 +1,26 @@
-import { Shield } from "lucide-react";
-import { loginAction } from "./actions";
+import Link from "next/link";
+import { customerLoginAction } from "./actions";
 
-export default function AdminLoginPage() {
+export default function CustomerLoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-neutral-950 px-6 text-white">
       <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
-        <div className="flex size-16 items-center justify-center rounded-full bg-white text-neutral-950">
-          <Shield size={28} />
-        </div>
-
-        <p className="mt-8 text-xs font-bold uppercase tracking-[0.35em] text-stone-400">
-          Admin
+        <p className="text-xs font-bold uppercase tracking-[0.35em] text-stone-400">
+          Conta
         </p>
 
         <h1 className="mt-4 text-4xl font-black tracking-tight">
-          TERR4 Dashboard
+          Entrar
         </h1>
 
         <p className="mt-4 text-sm leading-6 text-white/55">
-          Área privada de gestão da TERR4.
+          Acede à tua conta TERR4.
         </p>
 
-        <form action={loginAction} className="mt-8 space-y-5">
+        <form
+          action={customerLoginAction}
+          className="mt-8 space-y-5"
+        >
           <input
             type="email"
             name="email"
@@ -43,6 +42,16 @@ export default function AdminLoginPage() {
             Entrar
           </button>
         </form>
+
+        <p className="mt-6 text-sm text-white/45">
+          Ainda não tens conta?{" "}
+          <Link
+            href="/account/register"
+            className="font-bold text-white"
+          >
+            Criar conta
+          </Link>
+        </p>
       </div>
     </main>
   );

@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 enum ProductStatus {
@@ -61,12 +61,26 @@ model AdminUser {
   name         String
   passwordHash String
   role         String   @default("ADMIN")
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
+model CustomerUser {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  passwordHash  String
+
+  orders        Order[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 model Order {
   id                      String      @id @default(cuid())
+
   customerName            String
   customerEmail           String
   customerPhone           String?
@@ -75,10 +89,15 @@ model Order {
   postalCode              String?
   country                 String?
   notes                   String?
+
   status                  OrderStatus @default(PENDING)
   totalCents              Int
+
   stripeCheckoutSessionId String?
   stripePaymentIntentId   String?
+
+  customerUserId          String?
+  customerUser            CustomerUser? @relation(fields: [customerUserId], references: [id], onDelete: SetNull)
 
   items                   OrderItem[]
 
@@ -88,6 +107,7 @@ model Order {
 
 model OrderItem {
   id         String  @id @default(cuid())
+
   quantity   Int
   unitCents  Int
   name       String

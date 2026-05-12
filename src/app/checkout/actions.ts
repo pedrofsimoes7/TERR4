@@ -67,7 +67,9 @@ export async function createPaymentIntentAction(formData: FormData) {
   const order = await prisma.$transaction(async (tx) => {
     for (const item of orderItems) {
       const product = await tx.product.findUnique({
-        where: { id: item.productId },
+        where: {
+          id: item.productId,
+        },
       });
 
       if (!product || product.stock < item.quantity) {
@@ -75,7 +77,9 @@ export async function createPaymentIntentAction(formData: FormData) {
       }
 
       await tx.product.update({
-        where: { id: item.productId },
+        where: {
+          id: item.productId,
+        },
         data: {
           stock: {
             decrement: item.quantity,
@@ -83,6 +87,12 @@ export async function createPaymentIntentAction(formData: FormData) {
         },
       });
     }
+
+    const existingCustomer = await tx.customerUser.findUnique({
+      where: {
+        email: email.toLowerCase(),
+      },
+    });
 
     return tx.order.create({
       data: {
@@ -95,6 +105,9 @@ export async function createPaymentIntentAction(formData: FormData) {
         country,
         notes,
         totalCents,
+
+        customerUserId: existingCustomer?.id,
+
         items: {
           create: orderItems,
         },
@@ -115,7 +128,9 @@ export async function createPaymentIntentAction(formData: FormData) {
   });
 
   await prisma.order.update({
-    where: { id: order.id },
+    where: {
+      id: order.id,
+    },
     data: {
       stripePaymentIntentId: paymentIntent.id,
     },

@@ -59,8 +59,15 @@ export function Header() {
           <CartLink />
 
           <Link
-            href="/contact"
+            href="/account"
             className="hidden rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white hover:text-neutral-950 sm:inline-flex"
+          >
+            Conta
+          </Link>
+
+          <Link
+            href="/contact"
+            className="hidden rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white hover:text-neutral-950 xl:inline-flex"
           >
             Falar connosco
           </Link>

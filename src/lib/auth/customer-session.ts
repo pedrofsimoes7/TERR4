@@ -1,23 +1,25 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-const SESSION_NAME = "terr4-admin-session";
+const SESSION_NAME = "terr4-customer-session";
 
 const secret = new TextEncoder().encode(
-  process.env.ADMIN_SESSION_SECRET || "dev-secret-change-this"
+  process.env.CUSTOMER_SESSION_SECRET ||
+    "customer-dev-secret-change-this"
 );
 
-type AdminSessionPayload = {
-  adminId: string;
+type CustomerSessionPayload = {
+  customerId: string;
   email: string;
-  role: string;
 };
 
-export async function createSession(payload: AdminSessionPayload) {
+export async function createCustomerSession(
+  payload: CustomerSessionPayload
+) {
   const token = await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("7d")
+    .setExpirationTime("30d")
     .sign(secret);
 
   const cookieStore = await cookies();
@@ -29,24 +31,27 @@ export async function createSession(payload: AdminSessionPayload) {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: 60 * 60 * 24 * 30,
   });
 }
 
-export async function destroySession() {
+export async function destroyCustomerSession() {
   const cookieStore = await cookies();
+
   cookieStore.delete(SESSION_NAME);
 }
 
-export async function getSession() {
+export async function getCustomerSession() {
   const cookieStore = await cookies();
+
   const token = cookieStore.get(SESSION_NAME)?.value;
 
   if (!token) return null;
 
   try {
     const verified = await jwtVerify(token, secret);
-    return verified.payload as AdminSessionPayload;
+
+    return verified.payload as CustomerSessionPayload;
   } catch {
     return null;
   }

@@ -1,14 +1,35 @@
+import bcrypt from "bcryptjs";
 import { PrismaClient, ProductStatus } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-const adapter = new PrismaBetterSqlite3({
-      url: process.env.DATABASE_URL!,
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
 });
 
-const prisma = new PrismaClient({ adapter });
+const adapter = new PrismaPg(pool);
 
+const prisma = new PrismaClient({
+  adapter,
+});
 async function main() {
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
   await prisma.productImage.deleteMany();
   await prisma.product.deleteMany();
+
+  await prisma.adminUser.deleteMany();
+
+  const passwordHash = await bcrypt.hash("terr4admin", 12);
+
+  await prisma.adminUser.create({
+    data: {
+      name: "TERR4 Admin",
+      email: "admin@terr4.pt",
+      passwordHash,
+      role: "ADMIN",
+    },
+  });
 
   const terr4Start = await prisma.product.create({
     data: {
@@ -83,7 +104,10 @@ async function main() {
         { label: "Fechada", value: "80 x 13 cm" },
         { label: "Capacidade", value: "120 kg" },
       ]),
-      includedJson: JSON.stringify(["Cadeira", "Saco de transporte"]),
+      includedJson: JSON.stringify([
+        "Cadeira",
+        "Saco de transporte",
+      ]),
       images: {
         create: [
           {
@@ -96,7 +120,7 @@ async function main() {
     },
   });
 
-  console.log(`Seeded ${terr4Start.name} and TERR4 Chair`);
+  console.log("Seed complete");
 }
 
 main()
