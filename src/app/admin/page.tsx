@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { logoutAction } from "./actions";
 
@@ -43,9 +44,32 @@ export default async function AdminDashboardPage() {
           <Stat label="Clientes" value="0" />
         </div>
 
+        <div className="mt-10 grid gap-4 md:grid-cols-4">
+          <AdminLink
+            href="/admin/products"
+            title="Produtos"
+            text="Gerir catálogo, preços e stock"
+          />
+          <AdminLink
+            href="/admin/orders"
+            title="Encomendas"
+            text="Ver e aprovar pedidos"
+          />
+          <AdminLink
+            href="/admin/customers"
+            title="Clientes"
+            text="Histórico e contactos"
+          />
+          <AdminLink
+            href="/admin/settings"
+            title="Definições"
+            text="Dados gerais da loja"
+          />
+        </div>
+
         <div className="mt-12 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04]">
           <div className="border-b border-white/10 px-6 py-5">
-            <h2 className="text-2xl font-black">Produtos</h2>
+            <h2 className="text-2xl font-black">Produtos recentes</h2>
           </div>
 
           <div className="divide-y divide-white/10">
@@ -59,9 +83,7 @@ export default async function AdminDashboardPage() {
                     {product.category}
                   </p>
 
-                  <h3 className="mt-2 text-xl font-black">
-                    {product.name}
-                  </h3>
+                  <h3 className="mt-2 text-xl font-black">{product.name}</h3>
                 </div>
 
                 <div className="text-right">
@@ -84,18 +106,31 @@ export default async function AdminDashboardPage() {
   );
 }
 
-function Stat({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
       <p className="text-sm text-white/45">{label}</p>
-
       <p className="mt-4 text-4xl font-black">{value}</p>
     </div>
+  );
+}
+
+function AdminLink({
+  href,
+  title,
+  text,
+}: {
+  href: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5 transition hover:bg-white/[0.08]"
+    >
+      <h3 className="font-black">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-white/45">{text}</p>
+    </Link>
   );
 }
