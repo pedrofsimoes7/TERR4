@@ -39,7 +39,6 @@ export default async function AdminOrdersPage() {
         {orders.length === 0 ? (
           <div className="mt-12 rounded-[2rem] border border-white/10 bg-white/[0.04] p-10 text-center">
             <h2 className="text-2xl font-black">Sem encomendas ainda</h2>
-
             <p className="mt-4 text-white/45">
               Quando existirem pedidos no checkout, vão aparecer aqui.
             </p>
@@ -107,9 +106,18 @@ export default async function AdminOrdersPage() {
                 </div>
 
                 <div className="mt-6 border-t border-white/10 pt-5">
-                  <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/35">
-                    Produtos
-                  </p>
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/35">
+                      Produtos
+                    </p>
+
+                    <Link
+                      href={`/admin/orders/${order.id}`}
+                      className="rounded-full border border-white/15 px-4 py-2 text-xs font-bold text-white/70 hover:bg-white hover:text-neutral-950"
+                    >
+                      Ver detalhes
+                    </Link>
+                  </div>
 
                   <div className="mt-4 grid gap-3">
                     {order.items.map((item) => (
@@ -131,39 +139,6 @@ export default async function AdminOrdersPage() {
                     ))}
                   </div>
                 </div>
-
-                {(order.address || order.city || order.notes) && (
-                  <div className="mt-6 grid gap-4 border-t border-white/10 pt-5 md:grid-cols-2">
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/35">
-                        Entrega
-                      </p>
-
-                      <p className="mt-3 text-sm leading-6 text-white/55">
-                        {[
-                          order.address,
-                          order.postalCode,
-                          order.city,
-                          order.country,
-                        ]
-                          .filter(Boolean)
-                          .join(", ") || "Sem morada"}
-                      </p>
-                    </div>
-
-                    {order.notes && (
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/35">
-                          Notas
-                        </p>
-
-                        <p className="mt-3 text-sm leading-6 text-white/55">
-                          {order.notes}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
               </article>
             ))}
           </div>

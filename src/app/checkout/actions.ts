@@ -40,6 +40,10 @@ export async function createOrderAction(formData: FormData) {
 
       if (!product || !product.priceCents) return null;
 
+      if (product.stock < item.quantity) {
+        return null;
+      }
+
       return {
         productId: product.id,
         name: product.name,
@@ -54,25 +58,54 @@ export async function createOrderAction(formData: FormData) {
     unitCents: number;
   }[];
 
+  if (orderItems.length !== items.length) {
+    redirect("/cart");
+  }
+
   const totalCents = orderItems.reduce((total, item) => {
     return total + item.unitCents * item.quantity;
   }, 0);
 
-  await prisma.order.create({
-    data: {
-      customerName: `${firstName} ${lastName}`.trim(),
-      customerEmail: email,
-      customerPhone: phone,
-      address,
-      postalCode,
-      city,
-      country,
-      notes,
-      totalCents,
-      items: {
-        create: orderItems,
+  await prisma.$transaction(async (tx) => {
+    for (const item of orderItems) {
+      const product = await tx.product.findUnique({
+        where: {
+          id: item.productId,
+        },
+      });
+
+      if (!product || product.stock < item.quantity) {
+        throw new Error("Stock insuficiente.");
+      }
+
+      await tx.product.update({
+        where: {
+          id: item.productId,
+        },
+        data: {
+          stock: {
+            decrement: item.quantity,
+          },
+        },
+      });
+    }
+
+    await tx.order.create({
+      data: {
+        customerName: `${firstName} ${lastName}`.trim(),
+        customerEmail: email,
+        customerPhone: phone,
+        address,
+        postalCode,
+        city,
+        country,
+        notes,
+        totalCents,
+        items: {
+          create: orderItems,
+        },
       },
-    },
+    });
   });
 
   redirect("/order-confirmation");
