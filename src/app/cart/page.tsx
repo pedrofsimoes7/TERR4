@@ -160,7 +160,12 @@ export default function CartPage() {
               type="button"
               className="mt-7 flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-neutral-950 transition hover:bg-stone-200"
             >
-              Checkout brevemente
+                          <Link
+                              href="/checkout"
+                              className="mt-7 flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-neutral-950 transition hover:bg-stone-200"
+                          >
+                              Continuar para checkout
+                          </Link>
             </button>
 
             <p className="mt-4 text-center text-xs text-white/35">
