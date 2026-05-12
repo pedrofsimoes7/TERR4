@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ProductStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -13,10 +14,18 @@ export default async function AdminEditProductPage({ params }: PageProps) {
 
   const product = await prisma.product.findUnique({
     where: { id },
+    include: {
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+    },
   });
 
   if (!product) notFound();
 
+  const mainImage = product.images[0]?.url ?? "/images/hero-jeep.jpeg";
   const updateWithId = updateProductAction.bind(null, product.id);
 
   return (
@@ -42,6 +51,23 @@ export default async function AdminEditProductPage({ params }: PageProps) {
           className="mt-10 rounded-[2rem] border border-white/10 bg-white/[0.04] p-7"
         >
           <div className="grid gap-6">
+            <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-black/20">
+              <Image
+                src={mainImage}
+                alt={product.name}
+                width={1200}
+                height={700}
+                className="aspect-[16/9] object-cover"
+              />
+            </div>
+
+            <Input
+              name="imageUrl"
+              label="Imagem principal"
+              defaultValue={mainImage}
+              placeholder="/images/hero-jeep.jpeg"
+            />
+
             <Input name="name" label="Nome" defaultValue={product.name} />
 
             <Input
@@ -116,11 +142,13 @@ function Input({
   label,
   name,
   defaultValue,
+  placeholder,
   type = "text",
 }: {
   label: string;
   name: string;
   defaultValue?: string;
+  placeholder?: string;
   type?: string;
 }) {
   return (
@@ -130,7 +158,8 @@ function Input({
         name={name}
         type={type}
         defaultValue={defaultValue}
-        className="mt-2 h-13 w-full rounded-full border border-white/10 bg-white/5 px-5 text-white outline-none"
+        placeholder={placeholder}
+        className="mt-2 h-13 w-full rounded-full border border-white/10 bg-white/5 px-5 text-white outline-none placeholder:text-white/30"
       />
     </div>
   );

@@ -13,6 +13,7 @@ export async function updateProductAction(id: string, formData: FormData) {
   const status = String(formData.get("status") || "DRAFT") as ProductStatus;
   const shortDescription = String(formData.get("shortDescription") || "");
   const description = String(formData.get("description") || "");
+  const imageUrl = String(formData.get("imageUrl") || "");
 
   await prisma.product.update({
     where: { id },
@@ -27,8 +28,41 @@ export async function updateProductAction(id: string, formData: FormData) {
     },
   });
 
+  if (imageUrl) {
+    const existingImage = await prisma.productImage.findFirst({
+      where: {
+        productId: id,
+      },
+      orderBy: {
+        sortOrder: "asc",
+      },
+    });
+
+    if (existingImage) {
+      await prisma.productImage.update({
+        where: {
+          id: existingImage.id,
+        },
+        data: {
+          url: imageUrl,
+          alt: name,
+        },
+      });
+    } else {
+      await prisma.productImage.create({
+        data: {
+          productId: id,
+          url: imageUrl,
+          alt: name,
+          sortOrder: 0,
+        },
+      });
+    }
+  }
+
   revalidatePath("/");
   revalidatePath("/shop");
+  revalidatePath(`/shop/${id}`);
   revalidatePath("/admin");
   revalidatePath("/admin/products");
 
