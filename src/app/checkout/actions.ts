@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { stripe } from "@/lib/stripe";
 
 type CheckoutItem = {
   slug: string;
@@ -39,10 +40,7 @@ export async function createOrderAction(formData: FormData) {
       const product = products.find((p) => p.slug === item.slug);
 
       if (!product || !product.priceCents) return null;
-
-      if (product.stock < item.quantity) {
-        return null;
-      }
+      if (product.stock < item.quantity) return null;
 
       return {
         productId: product.id,
@@ -66,12 +64,10 @@ export async function createOrderAction(formData: FormData) {
     return total + item.unitCents * item.quantity;
   }, 0);
 
-  await prisma.$transaction(async (tx) => {
+  const order = await prisma.$transaction(async (tx) => {
     for (const item of orderItems) {
       const product = await tx.product.findUnique({
-        where: {
-          id: item.productId,
-        },
+        where: { id: item.productId },
       });
 
       if (!product || product.stock < item.quantity) {
@@ -79,9 +75,7 @@ export async function createOrderAction(formData: FormData) {
       }
 
       await tx.product.update({
-        where: {
-          id: item.productId,
-        },
+        where: { id: item.productId },
         data: {
           stock: {
             decrement: item.quantity,
@@ -90,7 +84,7 @@ export async function createOrderAction(formData: FormData) {
       });
     }
 
-    await tx.order.create({
+    return tx.order.create({
       data: {
         customerName: `${firstName} ${lastName}`.trim(),
         customerEmail: email,
@@ -108,5 +102,38 @@ export async function createOrderAction(formData: FormData) {
     });
   });
 
-  redirect("/order-confirmation");
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+  const checkoutSession = await stripe.checkout.sessions.create({
+    mode: "payment",
+    customer_email: email,
+    success_url: `${appUrl}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${appUrl}/cart`,
+    metadata: {
+      orderId: order.id,
+    },
+    line_items: orderItems.map((item) => ({
+      quantity: item.quantity,
+      price_data: {
+        currency: "eur",
+        unit_amount: item.unitCents,
+        product_data: {
+          name: item.name,
+        },
+      },
+    })),
+  });
+
+  await prisma.order.update({
+    where: { id: order.id },
+    data: {
+      stripeCheckoutSessionId: checkoutSession.id,
+    },
+  });
+
+  if (!checkoutSession.url) {
+    redirect("/checkout");
+  }
+
+  redirect(checkoutSession.url);
 }
