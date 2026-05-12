@@ -1,47 +1,31 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { createOrderAction } from "./actions";
 import { useCartStore } from "@/store/cart-store";
 import { formatPrice } from "@/lib/utils";
 
 export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
-  const router = useRouter();
   const clearCart = useCartStore((state) => state.clearCart);
 
-  function handleTemporaryCheckout() {
-    clearCart();
-    router.push("/order-confirmation");
+  const router = useRouter();
+
+  const total = useMemo(() => {
+    return items.reduce((acc, item) => {
+      return acc + (item.product.price || 0) * item.quantity;
+    }, 0);
+  }, [items]);
+
+  useEffect(() => {
+    if (items.length === 0) {
+      router.push("/cart");
     }
+  }, [items, router]);
 
-  const total = items.reduce((acc, item) => {
-    return acc + (item.product.price || 0) * item.quantity;
-  }, 0);
-
-  if (items.length === 0) {
-    return (
-      <main className="bg-neutral-950 px-6 pb-24 pt-36 text-white">
-        <section className="mx-auto max-w-3xl text-center">
-          <h1 className="text-5xl font-black tracking-tight">
-            Checkout vazio.
-          </h1>
-
-          <p className="mt-5 text-white/55">
-            Adiciona produtos ao carrinho antes de continuar.
-          </p>
-
-          <Link
-            href="/shop"
-            className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-neutral-950"
-          >
-            Ver produtos
-          </Link>
-        </section>
-      </main>
-    );
-  }
+  if (items.length === 0) return null;
 
   return (
     <main className="bg-neutral-950 px-6 pb-24 pt-36 text-white">
@@ -56,17 +40,52 @@ export default function CheckoutPage() {
               Finalizar encomenda.
             </h1>
 
-            <form className="mt-10 space-y-8">
+            <form
+              action={async (formData) => {
+                await createOrderAction(formData);
+                clearCart();
+              }}
+              className="mt-10 space-y-8"
+            >
+              <input
+                type="hidden"
+                name="items"
+                value={JSON.stringify(
+                  items.map((item) => ({
+                    slug: item.product.slug,
+                    quantity: item.quantity,
+                  }))
+                )}
+              />
+
               <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-7">
                 <h2 className="text-2xl font-black">
                   Dados de contacto
                 </h2>
 
                 <div className="mt-6 grid gap-5 md:grid-cols-2">
-                  <Input placeholder="Nome" />
-                  <Input placeholder="Apelido" />
-                  <Input placeholder="Email" type="email" />
-                  <Input placeholder="Telefone" />
+                  <Input
+                    name="firstName"
+                    placeholder="Nome"
+                    required
+                  />
+
+                  <Input
+                    name="lastName"
+                    placeholder="Apelido"
+                  />
+
+                  <Input
+                    name="email"
+                    placeholder="Email"
+                    type="email"
+                    required
+                  />
+
+                  <Input
+                    name="phone"
+                    placeholder="Telefone"
+                  />
                 </div>
               </div>
 
@@ -76,11 +95,26 @@ export default function CheckoutPage() {
                 </h2>
 
                 <div className="mt-6 grid gap-5">
-                  <Input placeholder="Morada" />
+                  <Input
+                    name="address"
+                    placeholder="Morada"
+                  />
+
                   <div className="grid gap-5 md:grid-cols-3">
-                    <Input placeholder="Código postal" />
-                    <Input placeholder="Cidade" />
-                    <Input placeholder="País" />
+                    <Input
+                      name="postalCode"
+                      placeholder="Código postal"
+                    />
+
+                    <Input
+                      name="city"
+                      placeholder="Cidade"
+                    />
+
+                    <Input
+                      name="country"
+                      placeholder="País"
+                    />
                   </div>
                 </div>
               </div>
@@ -91,11 +125,19 @@ export default function CheckoutPage() {
                 </h2>
 
                 <textarea
+                  name="notes"
                   rows={5}
                   placeholder="Notas sobre a encomenda..."
                   className="mt-6 w-full rounded-[1.5rem] border border-white/10 bg-white/5 p-5 text-white outline-none placeholder:text-white/35"
                 />
               </div>
+
+              <button
+                type="submit"
+                className="flex h-13 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-black text-neutral-950 transition hover:bg-stone-200"
+              >
+                Finalizar pedido
+              </button>
             </form>
           </div>
 
@@ -156,16 +198,8 @@ export default function CheckoutPage() {
                 </span>
               </div>
 
-                          <button
-                              type="button"
-                              onClick={handleTemporaryCheckout}
-                              className="mt-7 flex h-13 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-black text-neutral-950 transition hover:bg-stone-200"
-                          >
-                              Finalizar pedido
-                          </button>
-
               <p className="mt-4 text-center text-xs text-white/35">
-                Stripe será integrado na próxima fase.
+                Pedido real guardado na base de dados.
               </p>
             </div>
           </aside>
@@ -176,14 +210,20 @@ export default function CheckoutPage() {
 }
 
 function Input({
+  name,
   placeholder,
   type = "text",
+  required,
 }: {
+  name: string;
   placeholder: string;
   type?: string;
+  required?: boolean;
 }) {
   return (
     <input
+      name={name}
+      required={required}
       type={type}
       placeholder={placeholder}
       className="h-13 w-full rounded-full border border-white/10 bg-white/5 px-5 text-white outline-none placeholder:text-white/35"
