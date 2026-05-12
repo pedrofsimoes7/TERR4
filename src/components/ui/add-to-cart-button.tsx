@@ -1,10 +1,10 @@
 "use client";
 
-import { Product } from "@/data/products";
+import { StoreProduct } from "@/lib/products";
 import { useCartStore } from "@/store/cart-store";
 
-export function AddToCartButton({ product }: { product: Product }) {
-  const addItem = useCartStore((state) => state.addItem);
+export function AddToCartButton({ product }: { product: StoreProduct }) {
+    const addItem = useCartStore((state) => state.addItem);
 
   if (product.status !== "available") {
     return (

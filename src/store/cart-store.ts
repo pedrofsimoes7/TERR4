@@ -2,16 +2,16 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Product } from "@/data/products";
+import { StoreProduct } from "@/lib/products";
 
 type CartItem = {
-  product: Product;
+  product: StoreProduct;
   quantity: number;
 };
 
 type CartStore = {
   items: CartItem[];
-  addItem: (product: Product) => void;
+  addItem: (product: StoreProduct) => void;
   decreaseItem: (slug: string) => void;
   removeItem: (slug: string) => void;
   clearCart: () => void;

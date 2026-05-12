@@ -1,7 +1,9 @@
 import { ProductCard } from "@/components/ui/product-card";
-import { products } from "@/data/products";
+import { getProducts } from "@/lib/products";
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  const products = await getProducts();
+
   return (
     <main className="bg-neutral-950 px-6 pb-24 pt-36 text-white">
       <section className="mx-auto max-w-7xl">

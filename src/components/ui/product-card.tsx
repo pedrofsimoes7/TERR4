@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Product } from "@/data/products";
+import { StoreProduct } from "@/lib/products";
 import { formatPrice } from "@/lib/utils";
 
-export function ProductCard({ product }: { product: Product }) {
-  return (
+export function ProductCard({ product }: { product: StoreProduct }) {
+    return (
     <Link
       href={`/shop/${product.slug}`}
       className="group overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04]"

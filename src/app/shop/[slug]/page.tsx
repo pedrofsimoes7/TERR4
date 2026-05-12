@@ -2,16 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Check, Package, Ruler, Shield, Truck } from "lucide-react";
-import { products } from "@/data/products";
 import { Button } from "@/components/ui/button";
 import { AddToCartButton } from "@/components/ui/add-to-cart-button";
 import { formatPrice } from "@/lib/utils";
+import { getProductBySlug, getProducts } from "@/lib/products";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const products = await getProducts();
+
   return products.map((product) => ({
     slug: product.slug,
   }));
@@ -19,7 +21,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
-  const product = products.find((item) => item.slug === slug);
+  const product = await getProductBySlug(slug);
 
   return {
     title: product ? `${product.name} | TERR4` : "Produto | TERR4",
@@ -28,7 +30,7 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
-  const product = products.find((item) => item.slug === slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) notFound();
 
@@ -56,7 +58,9 @@ export default async function ProductPage({ params }: PageProps) {
                   priority
                 />
                 <div className="absolute left-5 top-5 rounded-full bg-black/65 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] backdrop-blur">
-                  {product.status === "available" ? "Disponível" : "Brevemente"}
+                  {product.status === "available"
+                    ? "Disponível"
+                    : "Brevemente"}
                 </div>
               </div>
 
@@ -96,7 +100,9 @@ export default async function ProductPage({ params }: PageProps) {
 
                 <div className="mt-8 flex flex-wrap items-center gap-3">
                   <p className="text-3xl font-black">
-                    {product.price ? formatPrice(product.price) : "Preço em breve"}
+                    {product.price
+                      ? formatPrice(product.price)
+                      : "Preço em breve"}
                   </p>
 
                   {product.stock !== undefined && (
@@ -114,9 +120,21 @@ export default async function ProductPage({ params }: PageProps) {
                 </div>
 
                 <div className="mt-7 grid gap-3 sm:grid-cols-3">
-                  <MiniTrust icon={<Truck size={16} />} label="Envio" value="A combinar" />
-                  <MiniTrust icon={<Shield size={16} />} label="Garantia" value="3 anos" />
-                  <MiniTrust icon={<Package size={16} />} label="Inclui" value="Kit completo" />
+                  <MiniTrust
+                    icon={<Truck size={16} />}
+                    label="Envio"
+                    value="A combinar"
+                  />
+                  <MiniTrust
+                    icon={<Shield size={16} />}
+                    label="Garantia"
+                    value="3 anos"
+                  />
+                  <MiniTrust
+                    icon={<Package size={16} />}
+                    label="Inclui"
+                    value="Kit completo"
+                  />
                 </div>
               </div>
             </aside>
@@ -150,9 +168,11 @@ export default async function ProductPage({ params }: PageProps) {
             <p className="text-xs font-bold uppercase tracking-[0.35em] text-stone-400">
               Detalhes técnicos
             </p>
+
             <h2 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
               Feita para aguentar, simples de usar.
             </h2>
+
             <p className="mt-5 max-w-xl text-lg leading-8 text-white/60">
               A construção combina estrutura leve, tecidos técnicos e conforto
               real para dormires melhor fora de casa.
@@ -169,7 +189,10 @@ export default async function ProductPage({ params }: PageProps) {
                   <p className="text-xs uppercase tracking-[0.2em] text-white/35">
                     {spec.label}
                   </p>
-                  <p className="mt-2 font-bold text-white/90">{spec.value}</p>
+
+                  <p className="mt-2 font-bold text-white/90">
+                    {spec.value}
+                  </p>
                 </div>
               ))}
             </div>
@@ -186,6 +209,7 @@ export default async function ProductPage({ params }: PageProps) {
                   <span className="flex size-6 items-center justify-center rounded-full bg-neutral-950 text-white">
                     <Check size={14} />
                   </span>
+
                   <span className="font-medium">{item}</span>
                 </div>
               ))}
@@ -225,9 +249,11 @@ function MiniTrust({
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
       <div className="text-stone-300">{icon}</div>
+
       <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/35">
         {label}
       </p>
+
       <p className="mt-1 text-sm font-bold">{value}</p>
     </div>
   );
@@ -245,7 +271,9 @@ function Feature({
   return (
     <div className="rounded-[1.5rem] border border-white/10 bg-neutral-950/50 p-6">
       <div className="text-stone-300">{icon}</div>
+
       <h3 className="mt-5 text-xl font-black">{title}</h3>
+
       <p className="mt-3 text-sm leading-6 text-white/55">{text}</p>
     </div>
   );
@@ -261,6 +289,7 @@ function InfoPanel({
   return (
     <div className="rounded-[2rem] bg-white/60 p-7 shadow-sm ring-1 ring-black/5">
       <h2 className="text-2xl font-black">{title}</h2>
+
       <div className="mt-5">{children}</div>
     </div>
   );
