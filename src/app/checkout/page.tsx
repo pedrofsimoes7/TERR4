@@ -2,11 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart-store";
 import { formatPrice } from "@/lib/utils";
 
 export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
+  const router = useRouter();
+  const clearCart = useCartStore((state) => state.clearCart);
+
+  function handleTemporaryCheckout() {
+    clearCart();
+    router.push("/order-confirmation");
+    }
 
   const total = items.reduce((acc, item) => {
     return acc + (item.product.price || 0) * item.quantity;
@@ -148,12 +156,13 @@ export default function CheckoutPage() {
                 </span>
               </div>
 
-              <button
-                type="button"
-                className="mt-7 flex h-13 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-black text-neutral-950 transition hover:bg-stone-200"
-              >
-                Pagamento brevemente
-              </button>
+                          <button
+                              type="button"
+                              onClick={handleTemporaryCheckout}
+                              className="mt-7 flex h-13 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-black text-neutral-950 transition hover:bg-stone-200"
+                          >
+                              Finalizar pedido
+                          </button>
 
               <p className="mt-4 text-center text-xs text-white/35">
                 Stripe será integrado na próxima fase.
