@@ -9,7 +9,7 @@ type CheckoutItem = {
   quantity: number;
 };
 
-export async function createOrderAction(formData: FormData) {
+export async function createPaymentIntentAction(formData: FormData) {
   const firstName = String(formData.get("firstName") || "");
   const lastName = String(formData.get("lastName") || "");
   const email = String(formData.get("email") || "");
@@ -102,38 +102,31 @@ export async function createOrderAction(formData: FormData) {
     });
   });
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-
-  const checkoutSession = await stripe.checkout.sessions.create({
-    mode: "payment",
-    customer_email: email,
-    success_url: `${appUrl}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${appUrl}/cart`,
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: totalCents,
+    currency: "eur",
+    receipt_email: email,
     metadata: {
       orderId: order.id,
     },
-    line_items: orderItems.map((item) => ({
-      quantity: item.quantity,
-      price_data: {
-        currency: "eur",
-        unit_amount: item.unitCents,
-        product_data: {
-          name: item.name,
-        },
-      },
-    })),
+    automatic_payment_methods: {
+      enabled: true,
+    },
   });
 
   await prisma.order.update({
     where: { id: order.id },
     data: {
-      stripeCheckoutSessionId: checkoutSession.id,
+      stripePaymentIntentId: paymentIntent.id,
     },
   });
 
-  if (!checkoutSession.url) {
-    redirect("/checkout");
+  if (!paymentIntent.client_secret) {
+    throw new Error("Não foi possível iniciar pagamento.");
   }
 
-  redirect(checkoutSession.url);
+  return {
+    orderId: order.id,
+    clientSecret: paymentIntent.client_secret,
+  };
 }

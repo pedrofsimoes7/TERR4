@@ -5,6 +5,7 @@ import { stripe } from "@/lib/stripe";
 
 export async function POST(request: Request) {
   const body = await request.text();
+
   const signature = request.headers.get("stripe-signature");
 
   if (!signature) {
@@ -29,10 +30,10 @@ export async function POST(request: Request) {
     );
   }
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
+  if (event.type === "payment_intent.succeeded") {
+    const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
-    const orderId = session.metadata?.orderId;
+    const orderId = paymentIntent.metadata.orderId;
 
     if (orderId) {
       await prisma.order.update({
@@ -41,11 +42,7 @@ export async function POST(request: Request) {
         },
         data: {
           status: "PAID",
-          stripeCheckoutSessionId: session.id,
-          stripePaymentIntentId:
-            typeof session.payment_intent === "string"
-              ? session.payment_intent
-              : null,
+          stripePaymentIntentId: paymentIntent.id,
         },
       });
     }
