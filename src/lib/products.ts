@@ -32,18 +32,23 @@ function safeJson<T>(value: string, fallback: T): T {
 }
 
 export async function getProducts(): Promise<StoreProduct[]> {
-  const products = await prisma.product.findMany({
-    include: {
-      images: {
-        orderBy: {
-          sortOrder: "asc",
+    const products = await prisma.product.findMany({
+        where: {
+            status: {
+                not: "DRAFT",
+            },
         },
-      },
-    },
-    orderBy: {
-      createdAt: "asc",
-    },
-  });
+        include: {
+            images: {
+                orderBy: {
+                    sortOrder: "asc",
+                },
+            },
+        },
+        orderBy: {
+            createdAt: "asc",
+        },
+    });
 
   return products.map((product) => ({
     slug: product.slug,

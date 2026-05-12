@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
+import { archiveProductAction } from "./actions";
 
 export default async function AdminProductsPage() {
   const products = await prisma.product.findMany({
@@ -38,7 +39,7 @@ export default async function AdminProductsPage() {
         </div>
 
         <div className="mt-12 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04]">
-          <div className="hidden grid-cols-[1fr_120px_120px_140px] gap-4 border-b border-white/10 px-6 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white/35 md:grid">
+          <div className="hidden grid-cols-[1fr_120px_120px_160px] gap-4 border-b border-white/10 px-6 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white/35 md:grid">
             <span>Produto</span>
             <span>Preço</span>
             <span>Stock</span>
@@ -49,12 +50,19 @@ export default async function AdminProductsPage() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="grid gap-5 px-6 py-5 md:grid-cols-[1fr_120px_120px_140px] md:items-center md:gap-4"
+                className="grid gap-5 px-6 py-5 md:grid-cols-[1fr_120px_120px_160px] md:items-center md:gap-4"
               >
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                    {product.category}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">
+                      {product.category}
+                    </p>
+
+                    <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">
+                      {product.status}
+                    </span>
+                  </div>
+
                   <h2 className="mt-2 text-xl font-black">{product.name}</h2>
                   <p className="mt-1 text-sm text-white/40">{product.slug}</p>
                 </div>
@@ -77,13 +85,23 @@ export default async function AdminProductsPage() {
                   <p className="mt-1 font-bold md:mt-0">{product.stock}</p>
                 </div>
 
-                <div className="md:text-right">
+                <div className="flex gap-2 md:justify-end">
                   <Link
                     href={`/admin/products/${product.id}`}
                     className="inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-neutral-950 hover:bg-stone-200"
                   >
                     Editar
                   </Link>
+
+                  <form action={archiveProductAction}>
+                    <input type="hidden" name="id" value={product.id} />
+                    <button
+                      type="submit"
+                      className="rounded-full border border-white/15 px-4 py-2 text-sm font-bold text-white/70 hover:bg-red-500 hover:text-white"
+                    >
+                      Arquivar
+                    </button>
+                  </form>
                 </div>
               </div>
             ))}
