@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ShoppingBag } from "lucide-react";
 import { MobileMenu } from "@/components/layout/mobile-menu";
 
 const nav = [
@@ -32,6 +33,13 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
+            <Link
+                href="/cart"
+                className="flex size-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition hover:bg-white hover:text-neutral-950"
+                aria-label="Carrinho"
+            >
+                <ShoppingBag size={18} />
+            </Link>
           <Link
             href="/contact"
             className="hidden rounded-full border border-white/15 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white hover:text-neutral-950 sm:inline-flex"
