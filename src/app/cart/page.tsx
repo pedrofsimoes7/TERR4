@@ -2,13 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, Trash2 } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
 import { formatPrice } from "@/lib/utils";
 
 export default function CartPage() {
   const items = useCartStore((state) => state.items);
   const removeItem = useCartStore((state) => state.removeItem);
+  const addItem = useCartStore((state) => state.addItem);
+  const decreaseItem = useCartStore((state) => state.decreaseItem);
 
   const total = items.reduce((acc, item) => {
     return acc + (item.product.price || 0) * item.quantity;
@@ -94,10 +96,31 @@ export default function CartPage() {
                     </div>
 
                     <div className="mt-5 flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-white/45">Quantidade</p>
-                        <p className="font-bold">{item.quantity}</p>
-                      </div>
+                              <div>
+                                  <p className="text-sm text-white/45">Quantidade</p>
+
+                                  <div className="mt-2 flex items-center gap-3">
+                                      <button
+                                          type="button"
+                                          onClick={() => decreaseItem(item.product.slug)}
+                                          className="flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:bg-white hover:text-neutral-950"
+                                          aria-label="Diminuir quantidade"
+                                      >
+                                          <Minus size={15} />
+                                      </button>
+
+                                      <span className="min-w-6 text-center font-bold">{item.quantity}</span>
+
+                                      <button
+                                          type="button"
+                                          onClick={() => addItem(item.product)}
+                                          className="flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:bg-white hover:text-neutral-950"
+                                          aria-label="Aumentar quantidade"
+                                      >
+                                          <Plus size={15} />
+                                      </button>
+                                  </div>
+                              </div>
 
                       <div className="flex items-center gap-4">
                         <p className="text-lg font-black">
