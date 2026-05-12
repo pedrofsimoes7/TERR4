@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Check } from "lucide-react";
 import { products } from "@/data/products";
 import { Button } from "@/components/ui/button";
+import { AddToCartButton } from "@/components/ui/add-to-cart-button";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -85,7 +86,7 @@ export default async function ProductPage({ params }: PageProps) {
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button href="/contact">Pedir informação</Button>
+              <AddToCartButton product={product} />
               <Button href="/contact" variant="secondary">
                 Reservar
               </Button>
