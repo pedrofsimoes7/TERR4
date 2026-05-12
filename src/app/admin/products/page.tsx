@@ -10,7 +10,7 @@ export default async function AdminProductsPage() {
   return (
     <main className="min-h-screen bg-neutral-950 px-6 pb-24 pt-32 text-white">
       <section className="mx-auto max-w-7xl">
-        <div className="flex items-end justify-between gap-6">
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.35em] text-stone-400">
               Admin
@@ -20,16 +20,25 @@ export default async function AdminProductsPage() {
             </h1>
           </div>
 
-          <Link
-            href="/admin"
-            className="rounded-full border border-white/15 px-5 py-2 text-sm font-bold text-white/70 hover:bg-white hover:text-neutral-950"
-          >
-            Dashboard
-          </Link>
+          <div className="flex gap-3">
+            <Link
+              href="/admin"
+              className="rounded-full border border-white/15 px-5 py-2 text-sm font-bold text-white/70 hover:bg-white hover:text-neutral-950"
+            >
+              Dashboard
+            </Link>
+
+            <Link
+              href="/admin/products/new"
+              className="rounded-full bg-white px-5 py-2 text-sm font-bold text-neutral-950 hover:bg-stone-200"
+            >
+              Novo produto
+            </Link>
+          </div>
         </div>
 
         <div className="mt-12 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04]">
-          <div className="grid grid-cols-[1fr_120px_120px_140px] gap-4 border-b border-white/10 px-6 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white/35">
+          <div className="hidden grid-cols-[1fr_120px_120px_140px] gap-4 border-b border-white/10 px-6 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white/35 md:grid">
             <span>Produto</span>
             <span>Preço</span>
             <span>Stock</span>
@@ -40,7 +49,7 @@ export default async function AdminProductsPage() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="grid grid-cols-[1fr_120px_120px_140px] items-center gap-4 px-6 py-5"
+                className="grid gap-5 px-6 py-5 md:grid-cols-[1fr_120px_120px_140px] md:items-center md:gap-4"
               >
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-white/35">
@@ -50,18 +59,28 @@ export default async function AdminProductsPage() {
                   <p className="mt-1 text-sm text-white/40">{product.slug}</p>
                 </div>
 
-                <p className="font-bold">
-                  {product.priceCents
-                    ? formatPrice(product.priceCents / 100)
-                    : "—"}
-                </p>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 md:hidden">
+                    Preço
+                  </p>
+                  <p className="mt-1 font-bold md:mt-0">
+                    {product.priceCents
+                      ? formatPrice(product.priceCents / 100)
+                      : "—"}
+                  </p>
+                </div>
 
-                <p className="font-bold">{product.stock}</p>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 md:hidden">
+                    Stock
+                  </p>
+                  <p className="mt-1 font-bold md:mt-0">{product.stock}</p>
+                </div>
 
-                <div className="text-right">
+                <div className="md:text-right">
                   <Link
                     href={`/admin/products/${product.id}`}
-                    className="rounded-full bg-white px-4 py-2 text-sm font-bold text-neutral-950 hover:bg-stone-200"
+                    className="inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-neutral-950 hover:bg-stone-200"
                   >
                     Editar
                   </Link>
