@@ -2,8 +2,14 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
-import { ProductStatus } from "@prisma/client";
+import type { ProductStatus } from "@prisma/client";
 import { Plus, Trash2, Star } from "lucide-react";
+
+const PRODUCT_STATUSES: ProductStatus[] = [
+  "AVAILABLE",
+  "COMING_SOON",
+  "DRAFT",
+];
 
 type ImageItem = {
   id?: string;
@@ -388,7 +394,7 @@ Inclui: Produto TERR4`;
                 defaultValue={product.status}
                 className="mt-2 h-13 w-full rounded-full border border-white/10 bg-neutral-900 px-5 text-white outline-none"
               >
-                {Object.values(ProductStatus).map((status) => (
+                {PRODUCT_STATUSES.map((status) => (
                   <option key={status} value={status}>
                     {status}
                   </option>
