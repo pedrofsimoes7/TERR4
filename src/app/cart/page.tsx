@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Trash2, ArrowUpRight } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
 import { formatPrice } from "@/lib/utils";
 
@@ -18,154 +18,147 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <main className="bg-neutral-950 px-6 pb-24 pt-36 text-white">
-        <section className="mx-auto max-w-4xl">
-          <p className="text-xs font-bold uppercase tracking-[0.35em] text-stone-400">
-            Carrinho
-          </p>
+      <main className="min-h-screen bg-[#070706] px-6 pb-28 pt-40 text-white">
+        <section className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto flex size-20 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] animate-pulse [animation-duration:2.5s]">
+            <ShoppingBag size={30} className="text-[#a79d8d]" />
+          </div>
 
-          <h1 className="mt-4 text-5xl font-black tracking-tight md:text-7xl">
-            A tua seleção.
+          <h1 className="mt-8 text-5xl font-black leading-[0.9] tracking-[-0.04em] md:text-7xl">
+            Carrinho vazio.
           </h1>
 
-          <div className="mt-12 rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 text-center">
-            <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-white/10">
-              <ShoppingBag size={28} />
-            </div>
+          <p className="mx-auto mt-5 max-w-sm text-base leading-7 text-[#c8c4be]/55">
+            Ainda não adicionaste nenhum produto. Explora o equipamento TERR4.
+          </p>
 
-            <h2 className="mt-6 text-2xl font-black">Carrinho vazio</h2>
-
-            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/55">
-              Ainda não adicionaste nenhum produto.
-            </p>
-
-            <Link
-              href="/shop"
-              className="mt-7 inline-flex h-12 items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-neutral-950 transition hover:bg-stone-200"
-            >
-              Ver produtos
-            </Link>
-          </div>
+          <Link
+            href="/shop"
+            className="btn-wipe group mt-10 inline-flex h-13 items-center gap-3 rounded-full bg-[#f4efe4] px-8 text-sm font-black uppercase tracking-[0.1em] text-neutral-950 transition duration-300 hover:-translate-y-0.5 hover:bg-white"
+          >
+            Ver produtos
+            <ArrowUpRight size={15} className="transition duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </Link>
         </section>
       </main>
     );
   }
 
   return (
-    <main className="bg-neutral-950 px-6 pb-24 pt-36 text-white">
+    <main className="min-h-screen bg-[#070706] px-6 pb-28 pt-40 text-white">
       <section className="mx-auto max-w-6xl">
-        <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.35em] text-stone-400">
-              Carrinho
-            </p>
+        <div className="mb-10">
+          <p className="text-xs font-black uppercase tracking-[0.35em] text-[#a79d8d]">
+            Carrinho
+          </p>
+          <h1 className="mt-4 text-6xl font-black leading-[0.9] tracking-[-0.04em] md:text-8xl">
+            A tua seleção.
+          </h1>
+        </div>
 
-            <h1 className="mt-4 text-5xl font-black tracking-tight md:text-7xl">
-              A tua seleção.
-            </h1>
+        <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+          <div className="space-y-4">
+            {items.map((item) => (
+              <div
+                key={item.product.slug}
+                className="group flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-white/[0.03] p-5 transition-colors duration-300 hover:border-white/20 sm:flex-row"
+              >
+                <div className="overflow-hidden rounded-[1.5rem] bg-[#151411]">
+                  <Image
+                    src={item.product.images[0]}
+                    alt={item.product.name}
+                    width={260}
+                    height={200}
+                    className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.03] sm:w-[200px]"
+                  />
+                </div>
 
-            <div className="mt-10 space-y-5">
-              {items.map((item) => (
-                <div
-                  key={item.product.slug}
-                  className="flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 sm:flex-row"
-                >
-                  <div className="relative overflow-hidden rounded-[1.5rem]">
-                    <Image
-                      src={item.product.images[0]}
-                      alt={item.product.name}
-                      width={260}
-                      height={200}
-                      className="aspect-[4/3] w-full object-cover sm:w-[220px]"
-                    />
+                <div className="flex flex-1 flex-col justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.25em] text-[#a79d8d]">
+                      {item.product.category}
+                    </p>
+                    <h2 className="mt-2 text-2xl font-black text-white">
+                      {item.product.name}
+                    </h2>
+                    <p className="mt-2 text-sm leading-6 text-[#c8c4be]/55">
+                      {item.product.shortDescription}
+                    </p>
                   </div>
 
-                  <div className="flex flex-1 flex-col justify-between">
-                    <div>
-                      <p className="text-sm text-white/45">
-                        {item.product.category}
-                      </p>
-
-                      <h2 className="mt-2 text-2xl font-black">
-                        {item.product.name}
-                      </h2>
-
-                      <p className="mt-3 text-sm leading-6 text-white/60">
-                        {item.product.shortDescription}
-                      </p>
+                  <div className="mt-5 flex items-center justify-between">
+                    <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] p-1">
+                      <button
+                        type="button"
+                        onClick={() => decreaseItem(item.product.slug)}
+                        className="flex size-8 items-center justify-center rounded-full text-white/60 transition hover:bg-white hover:text-neutral-950"
+                      >
+                        <Minus size={13} />
+                      </button>
+                      <span className="min-w-6 text-center text-sm font-black">
+                        {item.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => addItem(item.product)}
+                        className="flex size-8 items-center justify-center rounded-full text-white/60 transition hover:bg-white hover:text-neutral-950"
+                      >
+                        <Plus size={13} />
+                      </button>
                     </div>
 
-                    <div className="mt-5 flex items-center justify-between">
-                              <div>
-                                  <p className="text-sm text-white/45">Quantidade</p>
-
-                                  <div className="mt-2 flex items-center gap-3">
-                                      <button
-                                          type="button"
-                                          onClick={() => decreaseItem(item.product.slug)}
-                                          className="flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:bg-white hover:text-neutral-950"
-                                          aria-label="Diminuir quantidade"
-                                      >
-                                          <Minus size={15} />
-                                      </button>
-
-                                      <span className="min-w-6 text-center font-bold">{item.quantity}</span>
-
-                                      <button
-                                          type="button"
-                                          onClick={() => addItem(item.product)}
-                                          className="flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:bg-white hover:text-neutral-950"
-                                          aria-label="Aumentar quantidade"
-                                      >
-                                          <Plus size={15} />
-                                      </button>
-                                  </div>
-                              </div>
-
-                      <div className="flex items-center gap-4">
-                        <p className="text-lg font-black">
-                          {formatPrice(
-                            (item.product.price || 0) * item.quantity
-                          )}
-                        </p>
-
-                        <button
-                          type="button"
-                          onClick={() => removeItem(item.product.slug)}
-                          className="flex size-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:bg-red-500 hover:text-white"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
+                    <div className="flex items-center gap-4">
+                      <p className="text-xl font-black">
+                        {formatPrice((item.product.price || 0) * item.quantity)}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => removeItem(item.product.slug)}
+                        className="flex size-10 items-center justify-center rounded-full border border-white/10 text-white/40 transition hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
 
-          <aside className="h-fit rounded-[2rem] border border-white/10 bg-white/[0.04] p-7 lg:sticky lg:top-28">
-            <p className="text-sm font-semibold text-white/45">
-              Resumo da encomenda
+          {/* Summary */}
+          <aside className="h-fit rounded-[2.5rem] border border-white/10 bg-white/[0.03] p-7 lg:sticky lg:top-28">
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#a79d8d]">
+              Resumo
             </p>
 
-            <div className="mt-6 flex items-center justify-between border-b border-white/10 pb-5">
-              <span className="text-white/60">Subtotal</span>
-              <span className="text-xl font-black">
-                {formatPrice(total)}
-              </span>
+            <div className="mt-6 space-y-3 border-b border-white/10 pb-6">
+              {items.map((item) => (
+                <div key={item.product.slug} className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-[#c8c4be]/60">
+                    {item.product.name} ×{item.quantity}
+                  </span>
+                  <span className="text-sm font-bold">
+                    {formatPrice((item.product.price || 0) * item.quantity)}
+                  </span>
+                </div>
+              ))}
             </div>
 
-            
-                          <Link
-                              href="/checkout"
-                              className="mt-7 flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-neutral-950 transition hover:bg-stone-200"
-                          >
-                              Continuar para checkout
-                          </Link>
+            <div className="mt-5 flex items-center justify-between">
+              <span className="text-[#c8c4be]/60">Total</span>
+              <span className="text-3xl font-black text-white">{formatPrice(total)}</span>
+            </div>
 
-            <p className="mt-4 text-center text-xs text-white/35">
-              Stripe e checkout real entram na próxima fase.
+            <Link
+              href="/checkout"
+              className="btn-wipe group mt-7 flex h-13 w-full items-center justify-center gap-3 rounded-full bg-[#f4efe4] text-sm font-black uppercase tracking-[0.1em] text-neutral-950 transition duration-300 hover:-translate-y-0.5 hover:bg-white active:scale-[0.97]"
+            >
+              Continuar para checkout
+              <ArrowUpRight size={15} className="transition duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </Link>
+
+            <p className="mt-4 text-center text-xs text-[#c8c4be]/30">
+              Pagamento seguro via Stripe
             </p>
           </aside>
         </div>

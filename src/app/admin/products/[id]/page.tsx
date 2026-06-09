@@ -55,6 +55,7 @@ export default async function AdminEditProductPage({
         <ProductForm
           product={product}
           mainImage={mainImage}
+          extraImages={product.images}
           updateAction={updateWithId}
         />
       </section>

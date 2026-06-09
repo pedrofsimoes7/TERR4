@@ -33,6 +33,8 @@ model Product {
   description      String
   specsJson        String
   includedJson     String
+  featuresJson      String        @default("[]")
+  trustItemsJson    String        @default("[]")
   warranty         String?
   compatibility    String?
 
@@ -67,15 +69,27 @@ model AdminUser {
 }
 
 model CustomerUser {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  name          String?
-  passwordHash  String
 
-  orders        Order[]
+  id                         String   @id @default(cuid())
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  email                      String   @unique
+
+  name                       String?
+
+  passwordHash               String
+
+  emailVerifiedAt            DateTime?
+
+  emailVerificationToken     String?  @unique
+
+  emailVerificationExpiresAt DateTime?
+
+  orders                     Order[]
+
+  createdAt                  DateTime @default(now())
+
+  updatedAt                  DateTime @updatedAt
+
 }
 
 model Order {
@@ -94,7 +108,12 @@ model Order {
   totalCents              Int
 
   stripeCheckoutSessionId String?
-  stripePaymentIntentId   String?
+  stripePaymentIntentId   String?   @unique
+
+  paidAt                  DateTime?
+  invoiceNumber           String?   @unique
+  invoiceSentAt           DateTime?
+  invoiceEmailId          String?
 
   customerUserId          String?
   customerUser            CustomerUser? @relation(fields: [customerUserId], references: [id], onDelete: SetNull)

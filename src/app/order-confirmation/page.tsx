@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, ArrowUpRight } from "lucide-react";
 
 type PageProps = {
   searchParams: Promise<{
@@ -8,50 +8,50 @@ type PageProps = {
   }>;
 };
 
-export default async function OrderConfirmationPage({
-  searchParams,
-}: PageProps) {
+export default async function OrderConfirmationPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const isPaid = params.redirect_status === "succeeded";
 
   return (
-    <main className="bg-neutral-950 px-6 pb-24 pt-36 text-white">
-      <section className="mx-auto max-w-3xl text-center">
-        <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-white text-neutral-950">
-          <CheckCircle size={36} />
+    <main className="min-h-screen bg-[#070706] px-6 pb-28 pt-40 text-white">
+      <section className="mx-auto max-w-2xl text-center">
+
+        <div className="mx-auto flex size-24 items-center justify-center rounded-full border border-[#2d4a2d]/50 bg-[#2d4a2d]/20 text-green-300">
+          <CheckCircle size={42} strokeWidth={1.5} />
         </div>
 
-        <p className="mt-8 text-xs font-bold uppercase tracking-[0.35em] text-stone-400">
+        <p className="mt-8 text-xs font-black uppercase tracking-[0.35em] text-[#a79d8d]">
           {isPaid ? "Pagamento recebido" : "Pedido recebido"}
         </p>
 
-        <h1 className="mt-4 text-5xl font-black tracking-tight md:text-7xl">
+        <h1 className="mt-4 text-6xl font-black leading-[0.9] tracking-[-0.04em] md:text-8xl">
           {isPaid ? "Encomenda confirmada." : "Encomenda registada."}
         </h1>
 
-        <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-white/60">
+        <p className="mx-auto mt-7 max-w-md text-lg leading-8 text-[#c8c4be]/60">
           {isPaid
             ? "Obrigado pela tua compra. O pagamento foi processado com sucesso e a equipa TERR4 vai preparar a tua encomenda."
-            : "Recebemos o teu pedido. Se o pagamento ainda estiver a ser confirmado, a encomenda será atualizada automaticamente quando a Stripe validar o pagamento."}
+            : "Recebemos o teu pedido. A encomenda será atualizada automaticamente quando o pagamento for validado."}
         </p>
 
         {params.payment_intent && (
-          <p className="mx-auto mt-5 max-w-xl rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-xs text-white/40">
-            Referência Stripe: {params.payment_intent.slice(0, 18)}...
+          <p className="mx-auto mt-6 max-w-sm rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 font-mono text-xs text-white/35">
+            {params.payment_intent.slice(0, 22)}...
           </p>
         )}
 
-        <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
+        <div className="mt-12 flex flex-col justify-center gap-3 sm:flex-row">
           <Link
             href="/shop"
-            className="inline-flex h-12 items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-neutral-950 transition hover:bg-stone-200"
+            className="btn-wipe group inline-flex h-13 items-center justify-center gap-2 rounded-full bg-[#f4efe4] px-8 text-sm font-black uppercase tracking-[0.1em] text-neutral-950 transition hover:-translate-y-0.5 hover:bg-white"
           >
             Ver produtos
+            <ArrowUpRight size={15} className="transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </Link>
 
           <Link
             href="/contact"
-            className="inline-flex h-12 items-center justify-center rounded-full border border-white/15 bg-white/5 px-6 text-sm font-bold text-white transition hover:bg-white hover:text-neutral-950"
+            className="inline-flex h-13 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] px-8 text-sm font-black uppercase tracking-[0.1em] text-white transition hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/[0.08]"
           >
             Falar connosco
           </Link>

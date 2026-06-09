@@ -1,27 +1,155 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #f5f2ea;
+  --background: #070706;
+  --foreground: #c8c4be;
+  --terr4-ink: #070706;
+  --terr4-card: #151411;
+  --terr4-sand: #d8d0c2;
+  --terr4-cream: #f4efe4;
+  --terr4-muted: #a79d8d;
+  --terr4-rust: #c46a2d;
+  --terr4-green: #2d4a2d;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-barlow);
+  --font-mono: var(--font-barlow);
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html {
+html, body {
+  min-height: 100%;
+  background: #070706;
   scroll-behavior: smooth;
 }
 
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #070706; }
+::-webkit-scrollbar-thumb { background: rgba(196,106,45,0.45); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(196,106,45,0.75); }
+
 body {
   margin: 0;
-  background: var(--background);
   color: var(--foreground);
+  background:
+    radial-gradient(circle at 10% 6%, rgba(196,106,45,0.11), transparent 28rem),
+    radial-gradient(circle at 88% 2%, rgba(216,208,194,0.06), transparent 24rem),
+    linear-gradient(180deg, #090907 0%, #050504 100%);
+}
+
+/* ── Film grain ── */
+body::before {
+  pointer-events: none;
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  opacity: 0.032;
+  mix-blend-mode: overlay;
+  background-image: radial-gradient(circle, rgba(255,255,255,.5) 0 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* ── Typography — one font only ── */
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--terr4-rust);
+  color: var(--terr4-cream);
+}
+
+/* ── Marquee ── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── Ticker skew ── */
+.ticker-skew {
+  transform: skewY(-1deg);
+  transform-origin: left center;
+}
+
+/* ── Button shimmer wipe ── */
+.btn-wipe {
+  position: relative;
+  overflow: hidden;
+}
+.btn-wipe::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,0.16) 50%, transparent 62%);
+  transform: translateX(-130%);
+  transition: none;
+}
+.btn-wipe:hover::after {
+  transform: translateX(130%);
+  transition: transform 0.55s ease;
+}
+
+/* ── Stat shimmer ── */
+.stat-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.stat-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 25%, rgba(255,255,255,0.05) 50%, transparent 75%);
+  transform: translateX(-150%);
+  transition: none;
+}
+.stat-shimmer:hover::before {
+  transform: translateX(150%);
+  transition: transform 0.65s ease;
+}
+
+/* ── Card hover glow ── */
+.card-hover-glow {
+  transition: box-shadow 0.4s ease, border-color 0.4s ease, transform 0.4s ease;
+}
+.card-hover-glow:hover {
+  box-shadow: 0 0 0 1px rgba(196,106,45,0.22), 0 24px 60px rgba(0,0,0,0.45);
+  border-color: rgba(196,106,45,0.18) !important;
+  transform: translateY(-3px);
+}
+
+/* ── Cursor ──
+#cursor-dot {
+  pointer-events: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 7px; height: 7px;
+  background: rgba(196,106,45,0.9);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 99999;
+  transition: width 0.18s, height 0.18s;
+  mix-blend-mode: screen;
+}
+#cursor-ring {
+  pointer-events: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 30px; height: 30px;
+  border: 1px solid rgba(196,106,45,0.32);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 99998;
+  transition: width 0.3s cubic-bezier(0.16,1,0.3,1), height 0.3s cubic-bezier(0.16,1,0.3,1);
+} */
+
+/* ── Focus styles ── */
+input:focus, textarea:focus {
+  border-color: rgba(196,106,45,0.55) !important;
+  background-color: rgba(255,255,255,0.06) !important;
 }

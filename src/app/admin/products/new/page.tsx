@@ -61,6 +61,54 @@ export default function NewProductPage() {
             <Textarea name="shortDescription" label="Descrição curta" />
             <Textarea name="description" label="Descrição longa" rows={7} />
 
+            <Textarea
+              name="specs"
+              label="Detalhes técnicos"
+              rows={8}
+              placeholder={`Material: Aço esmaltado
+Capacidade: 350 ml
+Peso: Leve e compacto`}
+            />
+
+            <Textarea
+              name="included"
+              label="Incluído"
+              rows={5}
+              placeholder={`Caneca TERR4
+Embalagem TERR4`}
+            />
+
+            <Textarea
+              name="features"
+              label="Cards/features do produto"
+              rows={6}
+              placeholder={`Compacta em viagem: Fácil de transportar e guardar.
+Preparada para uso outdoor: Construção resistente para campismo e roadtrips.`}
+            />
+
+            <Textarea
+              name="trustItems"
+              label="Badges rápidos"
+              rows={4}
+              defaultValue={`Envio: A combinar
+Garantia: 12 meses
+Inclui: Produto TERR4`}
+            />
+
+            <Textarea
+              name="compatibility"
+              label="Compatibilidade"
+              rows={4}
+              placeholder="Opcional. Usa só quando fizer sentido para o produto."
+            />
+
+            <Textarea
+              name="warranty"
+              label="Garantia"
+              rows={4}
+              defaultValue="12 meses contra defeitos de fabrico."
+            />
+
             <button
               type="submit"
               className="mt-4 flex h-13 items-center justify-center rounded-full bg-white px-6 text-sm font-black text-neutral-950 transition hover:bg-stone-200"
@@ -105,11 +153,13 @@ function Textarea({
   label,
   name,
   defaultValue,
+  placeholder,
   rows = 4,
 }: {
   label: string;
   name: string;
   defaultValue?: string;
+  placeholder?: string;
   rows?: number;
 }) {
   return (
@@ -119,7 +169,8 @@ function Textarea({
         name={name}
         rows={rows}
         defaultValue={defaultValue}
-        className="mt-2 w-full rounded-[1.5rem] border border-white/10 bg-white/5 p-5 text-white outline-none"
+        placeholder={placeholder}
+        className="mt-2 w-full rounded-[1.5rem] border border-white/10 bg-white/5 p-5 text-white outline-none placeholder:text-white/30"
       />
     </div>
   );

@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { motion, type Variants } from "framer-motion";
 import { createPaymentIntentAction } from "./actions";
 import { useCartStore } from "@/store/cart-store";
 import { formatPrice } from "@/lib/utils";
@@ -12,6 +13,18 @@ import { formatPrice } from "@/lib/utils";
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""
 );
+
+const sectionVariants: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut",
+    },
+  },
+};
 
 export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
@@ -23,27 +36,19 @@ export default function CheckoutPage() {
   const [creatingPayment, setCreatingPayment] = useState(false);
 
   const total = useMemo(() => {
-    return items.reduce((acc, item) => {
-      return acc + (item.product.price || 0) * item.quantity;
-    }, 0);
+    return items.reduce((acc, item) => acc + (item.product.price || 0) * item.quantity, 0);
   }, [items]);
 
   useEffect(() => {
-    if (items.length === 0 && !clientSecret) {
-      router.push("/cart");
-    }
+    if (items.length === 0 && !clientSecret) router.push("/cart");
   }, [items, clientSecret, router]);
 
   async function handleCreatePayment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     if (!formRef.current) return;
-
     setCreatingPayment(true);
-
     const formData = new FormData(formRef.current);
     const result = await createPaymentIntentAction(formData);
-
     setClientSecret(result.clientSecret);
     setCreatingPayment(false);
   }
@@ -51,134 +56,140 @@ export default function CheckoutPage() {
   if (items.length === 0 && !clientSecret) return null;
 
   return (
-    <main className="bg-neutral-950 px-6 pb-24 pt-36 text-white">
+    <main className="min-h-screen bg-[#070706] px-6 pb-28 pt-40 text-white">
       <section className="mx-auto max-w-7xl">
-        <div className="grid gap-10 lg:grid-cols-[1fr_420px]">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.35em] text-stone-400">
-              Checkout
-            </p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <p className="text-xs font-black uppercase tracking-[0.35em] text-[#a79d8d]">
+            Checkout
+          </p>
+          <h1 className="mt-4 text-6xl font-black leading-[0.9] tracking-[-0.04em] md:text-8xl">
+            Finalizar encomenda.
+          </h1>
+        </motion.div>
 
-            <h1 className="mt-4 text-5xl font-black tracking-tight md:text-7xl">
-              Finalizar encomenda.
-            </h1>
-
+        <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_400px]">
+          <div className="space-y-6">
             {!clientSecret ? (
-              <form
-                ref={formRef}
-                onSubmit={handleCreatePayment}
-                className="mt-10 space-y-8"
-              >
+              <form ref={formRef} onSubmit={handleCreatePayment} className="space-y-6">
                 <input
                   type="hidden"
                   name="items"
                   value={JSON.stringify(
-                    items.map((item) => ({
-                      slug: item.product.slug,
-                      quantity: item.quantity,
-                    }))
+                    items.map((item) => ({ slug: item.product.slug, quantity: item.quantity }))
                   )}
                 />
 
-                <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-7">
+                <motion.div
+                  variants={sectionVariants}
+                  initial="hidden"
+                  animate="visible"
+                  transition={{ delay: 0.1 }}
+                  className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-7"
+                >
                   <h2 className="text-2xl font-black">Dados de contacto</h2>
-
-                  <div className="mt-6 grid gap-5 md:grid-cols-2">
-                    <Input name="firstName" placeholder="Nome" required />
-                    <Input name="lastName" placeholder="Apelido" />
-                    <Input name="email" placeholder="Email" type="email" required />
-                    <Input name="phone" placeholder="Telefone" />
+                  <div className="mt-6 grid gap-4 md:grid-cols-2">
+                    <CheckoutInput name="firstName" placeholder="Nome" required />
+                    <CheckoutInput name="lastName" placeholder="Apelido" />
+                    <CheckoutInput name="email" placeholder="Email" type="email" required />
+                    <CheckoutInput name="phone" placeholder="Telefone" />
                   </div>
-                </div>
+                </motion.div>
 
-                <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-7">
+                <motion.div
+                  variants={sectionVariants}
+                  initial="hidden"
+                  animate="visible"
+                  transition={{ delay: 0.2 }}
+                  className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-7"
+                >
                   <h2 className="text-2xl font-black">Morada de entrega</h2>
-
-                  <div className="mt-6 grid gap-5">
-                    <Input name="address" placeholder="Morada" />
-
-                    <div className="grid gap-5 md:grid-cols-3">
-                      <Input name="postalCode" placeholder="Código postal" />
-                      <Input name="city" placeholder="Cidade" />
-                      <Input name="country" placeholder="País" />
+                  <div className="mt-6 grid gap-4">
+                    <CheckoutInput name="address" placeholder="Morada" />
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <CheckoutInput name="postalCode" placeholder="Código postal" />
+                      <CheckoutInput name="city" placeholder="Cidade" />
+                      <CheckoutInput name="country" placeholder="País" />
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
-                <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-7">
-                  <h2 className="text-2xl font-black">Informações adicionais</h2>
-
+                <motion.div
+                  variants={sectionVariants}
+                  initial="hidden"
+                  animate="visible"
+                  transition={{ delay: 0.3 }}
+                  className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-7"
+                >
+                  <h2 className="text-2xl font-black">Notas</h2>
                   <textarea
                     name="notes"
-                    rows={5}
-                    placeholder="Notas sobre a encomenda..."
-                    className="mt-6 w-full rounded-[1.5rem] border border-white/10 bg-white/5 p-5 text-white outline-none placeholder:text-white/35"
+                    rows={4}
+                    placeholder="Informações adicionais sobre a encomenda..."
+                    className="mt-6 w-full resize-none rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5 text-white outline-none placeholder:text-white/30 transition-colors focus:border-[#c46a2d]/60 focus:bg-white/[0.07]"
                   />
-                </div>
+                </motion.div>
 
-                <button
+                <motion.button
                   type="submit"
                   disabled={creatingPayment}
-                  className="flex h-13 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-black text-neutral-950 transition hover:bg-stone-200 disabled:cursor-not-allowed disabled:opacity-60"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="btn-wipe flex h-14 w-full items-center justify-center rounded-full bg-[#f4efe4] px-6 text-sm font-black uppercase tracking-[0.1em] text-neutral-950 transition disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {creatingPayment ? "A preparar pagamento..." : "Continuar para pagamento"}
-                </button>
+                </motion.button>
               </form>
             ) : (
-              <div className="mt-10 rounded-[2rem] border border-white/10 bg-white p-7 text-neutral-950">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-[2rem] border border-white/10 bg-white p-7 text-neutral-950"
+              >
                 <h2 className="text-2xl font-black">Pagamento</h2>
-
                 <div className="mt-6">
-                  <Elements
-                    stripe={stripePromise}
-                    options={{
-                      clientSecret,
-                      appearance: {
-                        theme: "flat",
-                      },
-                    }}
-                  >
+                  <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: "flat" } }}>
                     <PaymentForm clearCart={clearCart} />
                   </Elements>
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
 
-          <aside className="h-fit rounded-[2rem] border border-white/10 bg-white/[0.04] p-7 lg:sticky lg:top-28">
-            <h2 className="text-2xl font-black">Resumo da encomenda</h2>
+          {/* Order summary */}
+          <motion.aside
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.25, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="h-fit rounded-[2.5rem] border border-white/10 bg-white/[0.03] p-7 lg:sticky lg:top-28"
+          >
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#a79d8d]">
+              Resumo
+            </p>
 
-            <div className="mt-7 space-y-5">
+            <div className="mt-6 space-y-4">
               {items.map((item) => (
-                <div
-                  key={item.product.slug}
-                  className="flex gap-4 rounded-[1.5rem] border border-white/10 bg-black/20 p-4"
-                >
+                <div key={item.product.slug} className="flex gap-4 rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-3">
                   <div className="overflow-hidden rounded-2xl">
                     <Image
                       src={item.product.images[0]}
                       alt={item.product.name}
-                      width={120}
-                      height={100}
+                      width={80}
+                      height={64}
                       className="aspect-[4/3] object-cover"
                     />
                   </div>
-
                   <div className="flex flex-1 flex-col justify-between">
-                    <div>
-                      <p className="text-sm text-white/45">
-                        {item.product.category}
-                      </p>
-
-                      <h3 className="mt-1 font-black">{item.product.name}</h3>
-                    </div>
-
+                    <p className="text-sm font-black text-white">{item.product.name}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-white/55">
-                        x{item.quantity}
-                      </span>
-
-                      <span className="font-bold">
+                      <span className="text-xs text-white/45">×{item.quantity}</span>
+                      <span className="text-sm font-black">
                         {formatPrice((item.product.price || 0) * item.quantity)}
                       </span>
                     </div>
@@ -187,18 +198,16 @@ export default function CheckoutPage() {
               ))}
             </div>
 
-            <div className="mt-8 border-t border-white/10 pt-6">
+            <div className="mt-6 border-t border-white/10 pt-5">
               <div className="flex items-center justify-between">
-                <span className="text-white/55">Subtotal</span>
-
-                <span className="text-2xl font-black">{formatPrice(total)}</span>
+                <span className="text-[#c8c4be]/55">Total</span>
+                <span className="text-3xl font-black text-white">{formatPrice(total)}</span>
               </div>
-
-              <p className="mt-4 text-center text-xs text-white/35">
-                Pagamento seguro integrado por Stripe.
+              <p className="mt-4 text-center text-xs text-[#c8c4be]/30">
+                Pagamento seguro integrado por Stripe
               </p>
             </div>
-          </aside>
+          </motion.aside>
         </div>
       </section>
     </main>
@@ -213,51 +222,36 @@ function PaymentForm({ clearCart }: { clearCart: () => void }) {
 
   async function handlePayment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     if (!stripe || !elements) return;
-
     setPaying(true);
-
     const result = await stripe.confirmPayment({
       elements,
-      confirmParams: {
-        return_url: `${appUrl}/order-confirmation`,
-      },
+      confirmParams: { return_url: `${appUrl}/order-confirmation` },
     });
-
-    if (result.error) {
-      setPaying(false);
-      return;
-    }
-
+    if (result.error) { setPaying(false); return; }
     clearCart();
   }
 
   return (
     <form onSubmit={handlePayment}>
       <PaymentElement />
-
-      <button
+      <motion.button
         type="submit"
         disabled={!stripe || paying}
-        className="mt-7 flex h-13 w-full items-center justify-center rounded-full bg-neutral-950 px-6 text-sm font-black text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+        whileHover={{ y: -1 }}
+        whileTap={{ scale: 0.97 }}
+        className="btn-wipe mt-7 flex h-13 w-full items-center justify-center rounded-full bg-neutral-950 px-6 text-sm font-black uppercase tracking-[0.1em] text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {paying ? "A processar..." : "Pagar agora"}
-      </button>
+      </motion.button>
     </form>
   );
 }
 
-function Input({
-  name,
-  placeholder,
-  type = "text",
-  required,
+function CheckoutInput({
+  name, placeholder, type = "text", required,
 }: {
-  name: string;
-  placeholder: string;
-  type?: string;
-  required?: boolean;
+  name: string; placeholder: string; type?: string; required?: boolean;
 }) {
   return (
     <input
@@ -265,7 +259,7 @@ function Input({
       required={required}
       type={type}
       placeholder={placeholder}
-      className="h-13 w-full rounded-full border border-white/10 bg-white/5 px-5 text-white outline-none placeholder:text-white/35"
+      className="h-13 w-full rounded-full border border-white/10 bg-white/[0.04] px-5 text-white outline-none placeholder:text-white/30 transition-colors focus:border-[#c46a2d]/60 focus:bg-white/[0.07]"
     />
   );
 }

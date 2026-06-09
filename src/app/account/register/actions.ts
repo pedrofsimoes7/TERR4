@@ -1,9 +1,10 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { createCustomerSession } from "@/lib/auth/customer-session";
+import { sendCustomerVerificationEmail } from "@/lib/email";
 
 export async function customerRegisterAction(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
@@ -14,14 +15,12 @@ export async function customerRegisterAction(formData: FormData) {
 
   const password = String(formData.get("password") || "");
 
-  if (!email || !password) {
+  if (!email || !password || password.length < 6) {
     redirect("/account/register");
   }
 
   const existingCustomer = await prisma.customerUser.findUnique({
-    where: {
-      email,
-    },
+    where: { email },
   });
 
   if (existingCustomer) {
@@ -29,33 +28,26 @@ export async function customerRegisterAction(formData: FormData) {
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
+  const token = crypto.randomBytes(32).toString("hex");
 
-  const customer = await prisma.$transaction(async (tx) => {
-    const createdCustomer = await tx.customerUser.create({
-      data: {
-        name,
-        email,
-        passwordHash,
-      },
-    });
-
-    await tx.order.updateMany({
-      where: {
-        customerEmail: email,
-        customerUserId: null,
-      },
-      data: {
-        customerUserId: createdCustomer.id,
-      },
-    });
-
-    return createdCustomer;
+  const customer = await prisma.customerUser.create({
+    data: {
+      name,
+      email,
+      passwordHash,
+      emailVerificationToken: token,
+      emailVerificationExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+    },
   });
 
-  await createCustomerSession({
-    customerId: customer.id,
-    email: customer.email,
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const verificationUrl = `${appUrl}/account/verify-email?token=${token}`;
+
+  await sendCustomerVerificationEmail({
+    customerName: customer.name || "",
+    customerEmail: customer.email,
+    verificationUrl,
   });
 
-  redirect("/account");
+  redirect("/account/check-email");
 }

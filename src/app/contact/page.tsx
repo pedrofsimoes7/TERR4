@@ -1,49 +1,146 @@
+"use client";
+
+import { useState } from "react";
+import { ArrowUpRight, MapPin, Mail, Clock } from "lucide-react";
+
 export default function ContactPage() {
+  const [sent, setSent] = useState(false);
+
   return (
-    <main className="bg-neutral-950 px-6 pb-24 pt-36 text-white">
-      <section className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.35em] text-stone-400">
-            Contacto
-          </p>
-          <h1 className="mt-4 text-5xl font-black tracking-tight md:text-7xl">
-            Fala connosco.
-          </h1>
-          <p className="mt-6 max-w-xl text-lg leading-8 text-white/60">
-            Tens dúvidas sobre compatibilidade, stock, instalação ou encomendas?
-            Envia-nos uma mensagem e ajudamos-te.
-          </p>
+    <main className="min-h-screen bg-[#070706] px-6 pb-28 pt-40 text-white">
+      <section className="mx-auto max-w-7xl">
+
+        {/* Header */}
+        <div className="mb-16 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.35em] text-[#a79d8d]">
+              Contacto
+            </p>
+            <h1 className="mt-4 text-6xl font-black leading-[0.9] tracking-[-0.04em] md:text-8xl">
+              Fala connosco.
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-[#c8c4be]/60">
+              Tens dúvidas sobre compatibilidade, stock, instalação ou encomendas?
+              Envia-nos uma mensagem e ajudamos-te.
+            </p>
+          </div>
         </div>
 
-        <form className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6">
-          <div className="grid gap-5">
-            <input
-              placeholder="Nome"
-              className="h-12 rounded-full border border-white/10 bg-white/5 px-5 text-white outline-none placeholder:text-white/35"
-            />
-            <input
-              placeholder="Email"
-              type="email"
-              className="h-12 rounded-full border border-white/10 bg-white/5 px-5 text-white outline-none placeholder:text-white/35"
-            />
-            <input
-              placeholder="Veículo"
-              className="h-12 rounded-full border border-white/10 bg-white/5 px-5 text-white outline-none placeholder:text-white/35"
-            />
-            <textarea
-              placeholder="Mensagem"
-              rows={6}
-              className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 text-white outline-none placeholder:text-white/35"
-            />
-            <button
-              type="button"
-              className="h-12 rounded-full bg-white px-6 font-bold text-neutral-950 transition hover:bg-stone-200"
-            >
-              Enviar mensagem
-            </button>
+        <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
+          {/* Form */}
+          <div className="rounded-[2.5rem] border border-white/10 bg-white/[0.03] p-8 md:p-10">
+            {sent ? (
+              <div className="flex h-full flex-col items-center justify-center py-16 text-center">
+                <div className="flex size-16 items-center justify-center rounded-full bg-[#2d4a2d] text-green-100">
+                  <ArrowUpRight size={28} />
+                </div>
+                <h2 className="mt-6 text-3xl font-black">Mensagem enviada!</h2>
+                <p className="mt-3 text-[#c8c4be]/60">Respondemos em menos de 24 horas.</p>
+                <button
+                  onClick={() => setSent(false)}
+                  className="mt-8 rounded-full border border-white/15 px-6 py-2 text-sm font-bold text-white/60 transition hover:text-white"
+                >
+                  Enviar outra mensagem
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-5">
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <ContactInput placeholder="Nome" />
+                  <ContactInput placeholder="Email" type="email" />
+                </div>
+                <ContactInput placeholder="Veículo (ex: Toyota Land Cruiser)" />
+                <ContactTextarea placeholder="Como podemos ajudar?" rows={5} />
+                <button
+                  type="button"
+                  onClick={() => setSent(true)}
+                  className="btn-wipe group mt-2 flex h-13 items-center justify-center gap-3 rounded-full bg-[#f4efe4] px-8 font-black uppercase tracking-[0.1em] text-neutral-950 transition duration-300 hover:-translate-y-0.5 hover:bg-white active:scale-[0.97]"
+                >
+                  Enviar mensagem
+                  <ArrowUpRight size={16} className="transition duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </button>
+              </div>
+            )}
           </div>
-        </form>
+
+          {/* Info sidebar */}
+          <div className="flex flex-col gap-4">
+            <InfoCard
+              icon={<Mail size={18} />}
+              label="Email"
+              value="hello@terr4.pt"
+              href="mailto:hello@terr4.pt"
+            />
+            <InfoCard
+              icon={<MapPin size={18} />}
+              label="Localização"
+              value="Portugal"
+            />
+            <InfoCard
+              icon={<Clock size={18} />}
+              label="Resposta"
+              value="Menos de 24 horas"
+            />
+
+            <div className="mt-4 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] p-7">
+              <p className="text-xs font-black uppercase tracking-[0.28em] text-[#a79d8d]">
+                Compatibilidade
+              </p>
+              <p className="mt-3 text-sm leading-7 text-[#c8c4be]/65">
+                Antes de encomendar, diz-nos o modelo do teu veículo e o tipo
+                de barras de tejadilho. Confirmamos a compatibilidade gratuitamente.
+              </p>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   );
+}
+
+function ContactInput({ placeholder, type = "text" }: { placeholder: string; type?: string }) {
+  return (
+    <input
+      placeholder={placeholder}
+      type={type}
+      className="h-13 w-full rounded-full border border-white/10 bg-white/[0.04] px-5 text-white outline-none placeholder:text-white/30 transition-colors duration-200 focus:border-[#c46a2d]/60 focus:bg-white/[0.06]"
+    />
+  );
+}
+
+function ContactTextarea({ placeholder, rows }: { placeholder: string; rows: number }) {
+  return (
+    <textarea
+      placeholder={placeholder}
+      rows={rows}
+      className="w-full rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5 text-white outline-none placeholder:text-white/30 transition-colors duration-200 focus:border-[#c46a2d]/60 focus:bg-white/[0.06] resize-none"
+    />
+  );
+}
+
+function InfoCard({
+  icon,
+  label,
+  value,
+  href,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  href?: string;
+}) {
+  const content = (
+    <div className="flex items-center gap-4 rounded-[1.5rem] border border-white/10 bg-white/[0.03] px-5 py-4 transition-colors duration-200 hover:border-white/20 hover:bg-white/[0.06]">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-[#a79d8d]">
+        {icon}
+      </div>
+      <div>
+        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/30">{label}</p>
+        <p className="mt-0.5 text-sm font-bold text-white">{value}</p>
+      </div>
+    </div>
+  );
+
+  if (href) return <a href={href}>{content}</a>;
+  return content;
 }

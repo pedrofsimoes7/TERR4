@@ -1,3 +1,8 @@
+"use client";
+
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+
 const faqs = [
   {
     q: "A TERR4 Start é compatível com o meu carro?",
@@ -17,23 +22,49 @@ const faqs = [
   },
 ];
 
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="border-b border-white/10 last:border-0">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between gap-6 px-7 py-6 text-left transition-colors duration-200 hover:bg-white/[0.02]"
+      >
+        <span className="text-lg font-black text-white">{q}</span>
+        <ChevronDown
+          size={18}
+          className={`shrink-0 text-[#a79d8d] transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-400 ease-in-out ${open ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
+        style={{ transitionProperty: "max-height, opacity" }}
+      >
+        <p className="px-7 pb-7 text-base leading-7 text-[#c8c4be]/65">{a}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function FaqPage() {
   return (
-    <main className="bg-neutral-950 px-6 pb-24 pt-36 text-white">
-      <section className="mx-auto max-w-4xl">
-        <p className="text-xs font-bold uppercase tracking-[0.35em] text-stone-400">
+    <main className="min-h-screen bg-[#070706] px-6 pb-28 pt-40 text-white">
+      <section className="mx-auto max-w-3xl">
+        <p className="text-xs font-black uppercase tracking-[0.35em] text-[#a79d8d]">
           FAQ
         </p>
-        <h1 className="mt-4 text-5xl font-black tracking-tight md:text-7xl">
+        <h1 className="mt-4 text-6xl font-black leading-[0.9] tracking-[-0.04em] md:text-8xl">
           Perguntas frequentes.
         </h1>
+        <p className="mt-6 text-lg leading-8 text-[#c8c4be]/60">
+          Tudo o que precisas de saber antes de partir.
+        </p>
 
-        <div className="mt-12 divide-y divide-white/10 rounded-[2rem] border border-white/10 bg-white/[0.04]">
+        <div className="mt-14 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03]">
           {faqs.map((faq) => (
-            <div key={faq.q} className="p-7">
-              <h2 className="text-xl font-black">{faq.q}</h2>
-              <p className="mt-3 leading-7 text-white/60">{faq.a}</p>
-            </div>
+            <FaqItem key={faq.q} q={faq.q} a={faq.a} />
           ))}
         </div>
       </section>

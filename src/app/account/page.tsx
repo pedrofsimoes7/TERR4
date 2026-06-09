@@ -1,10 +1,18 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getCustomerSession } from "@/lib/auth/customer-session";
+import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 import { customerLogoutAction } from "./actions";
 
 export default async function AccountPage() {
+  const adminSession = await getSession();
+
+  if (adminSession) {
+    redirect("/admin");
+  }
+
   const session = await getCustomerSession();
 
   if (!session) {
@@ -49,20 +57,20 @@ export default async function AccountPage() {
       id: session.customerId,
     },
     include: {
-        orders: {
-            where: {
-                OR: [
-                    { customerUserId: session.customerId },
-                    { customerEmail: session.email },
-                ],
-            },
-            include: {
-                items: true,
-            },
-            orderBy: {
-                createdAt: "desc",
-            },
+      orders: {
+        where: {
+          OR: [
+            { customerUserId: session.customerId },
+            { customerEmail: session.email },
+          ],
         },
+        include: {
+          items: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
     },
   });
 

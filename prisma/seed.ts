@@ -31,7 +31,7 @@ async function main() {
     },
   });
 
-  const terr4Start = await prisma.product.create({
+  await prisma.product.create({
     data: {
       slug: "terr4-start",
       name: "TERR4 Start",
@@ -66,7 +66,7 @@ async function main() {
       warranty:
         "3 anos contra defeitos de fabrico. Cobre estrutura, mecanismos e componentes, excluindo desgaste normal, danos por utilização incorreta, acidentes, montagem incorreta, exposição negligente e bolor por má secagem.",
       compatibility:
-        "Compatível com a maioria dos veículos — incluindo citadinos, SUVs, carrinhas e veículos 4x4 — desde que equipados com barras de tejadilho transversais adequadas.",
+        "Compatível com a maioria dos veículos (incluindo citadinos, SUVs, carrinhas e veículos 4x4) desde que equipados com barras de tejadilho transversais adequadas.",
       images: {
         create: [
           {
@@ -86,27 +86,24 @@ async function main() {
 
   await prisma.product.create({
     data: {
-      slug: "terr4-chair",
-      name: "TERR4 Chair",
+      slug: "terr4-camp-mug",
+      name: "TERR4 Camp Mug",
       category: "Outdoor Gear",
-      priceCents: null,
-      stock: 0,
-      status: ProductStatus.COMING_SOON,
+      priceCents: 2500,
+      stock: 20,
+      status: ProductStatus.AVAILABLE,
       shortDescription:
-        "Cadeira dobrável compacta com estrutura reforçada, suporte em X e transporte fácil.",
+        "Caneca outdoor em aço esmaltado para campismo, roadtrips e aventuras ao ar livre.",
       description:
-        "Uma cadeira prática para campismo, roadtrips e dias fora, com estrutura estável e arrumação compacta.",
+        "A TERR4 Camp Mug foi criada para acompanhar viagens, campismo e manhãs frias ao ar livre. Compacta, resistente e com identidade TERR4.",
       specsJson: JSON.stringify([
-        { label: "Estrutura", value: "Aço reforçado com sistema em X" },
-        { label: "Tubos", value: "16 mm" },
-        { label: "Material", value: "Oxford 600D" },
-        { label: "Aberta", value: "50 x 50 x 80 cm" },
-        { label: "Fechada", value: "80 x 13 cm" },
-        { label: "Capacidade", value: "120 kg" },
+        { label: "Material", value: "Aço esmaltado" },
+        { label: "Capacidade", value: "350 ml" },
+        { label: "Peso", value: "Leve e compacto" },
+        { label: "Utilização", value: "Outdoor e campismo" },
       ]),
       includedJson: JSON.stringify([
-        "Cadeira",
-        "Saco de transporte",
+        "Caneca TERR4",
       ]),
       images: {
         create: [
