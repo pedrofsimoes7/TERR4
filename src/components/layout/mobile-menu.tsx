@@ -41,7 +41,7 @@ export function MobileMenu({ nav }: { nav: NavItem[] }) {
         type="button"
         onClick={() => setOpen(true)}
         whileTap={{ scale: 0.92 }}
-        className="flex size-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white backdrop-blur"
+        className="relative z-[90] flex size-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white backdrop-blur"
         aria-label="Abrir menu"
       >
         <Menu size={18} />

@@ -32,11 +32,11 @@ export function Header() {
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className={`fixed left-0 top-0 z-50 w-full transition-all duration-500 ${
         scrolled
-          ? "border-b border-white/10 bg-[#070706]/95 backdrop-blur-md"
-          : "bg-[#070706]/88 backdrop-blur-md md:bg-transparent md:backdrop-blur-0"
+          ? "border-b border-white/10 bg-[#070706] md:bg-[#070706]/88 md:backdrop-blur-md"
+          : "bg-[#070706] md:bg-transparent"
       }`}
     >
-      <div className="mx-auto flex h-[5rem] max-w-7xl items-center justify-between px-6 pt-[env(safe-area-inset-top)] md:h-[5.5rem] md:pt-0">
+      <div className="mx-auto flex min-h-[5.5rem] max-w-7xl items-center justify-between px-6 pt-[env(safe-area-inset-top)] md:h-[5.5rem] md:pt-0">
         <Link href="/" className="group flex items-center">
           <Image
             src="/images/terr4-logo-assets/terr4-logo-beige-transparent.png"
