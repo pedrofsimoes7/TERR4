@@ -68,8 +68,8 @@ export default function ContactPage() {
             <InfoCard
               icon={<Mail size={18} />}
               label="Email"
-              value="hello@terr4.pt"
-              href="mailto:hello@terr4.pt"
+              value="terr4geral@gmail.com"
+              href="mailto:terr4geral@gmail.com"
             />
             <InfoCard
               icon={<MapPin size={18} />}

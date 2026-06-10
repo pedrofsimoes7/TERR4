@@ -39,7 +39,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
         />
       </button>
       <div
-        className={`overflow-hidden transition-all duration-400 ease-in-out ${open ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
+        className={`overflow-hidden transition-all duration-400 ease-in-out ${open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
         style={{ transitionProperty: "max-height, opacity" }}
       >
         <p className="px-7 pb-7 text-base leading-7 text-[#c8c4be]/65">{a}</p>

@@ -39,7 +39,7 @@ export function ProductCard({ product }: { product: StoreProduct }) {
               {product.category}
             </p>
 
-            <h2 className="mt-3 text-4xl font-black leading-none tracking-[-0.03em] text-white">
+            <h2 className="mt-3 text-3xl font-black leading-none tracking-[-0.03em] text-white">
               {product.name}
             </h2>
           </div>

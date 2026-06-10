@@ -47,7 +47,7 @@ export default async function ProductPage({ params }: PageProps) {
         ];
 
   return (
-    <main className="bg-[#070706] pb-24 text-[#c8c4be] md:pb-0">
+    <main className="bg-[#070706] pb-36 text-[#c8c4be] md:pb-0">
       <section className="px-6 pb-20 pt-36">
         <div className="mx-auto max-w-7xl">
           <Reveal>

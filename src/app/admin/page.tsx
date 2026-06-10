@@ -3,16 +3,19 @@ import { prisma } from "@/lib/prisma";
 import { logoutAction } from "./actions";
 
 export default async function AdminDashboardPage() {
-  const productCount = await prisma.product.count();
-
-  const products = await prisma.product.findMany({
-    include: {
-      images: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const [productCount, orderCount, customerCount, products] = await Promise.all([
+    prisma.product.count(),
+    prisma.order.count(),
+    prisma.customerUser.count(),
+    prisma.product.findMany({
+      include: {
+        images: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+  ]);
 
   return (
     <main className="min-h-screen bg-neutral-950 px-6 pb-24 pt-32 text-white">
@@ -40,11 +43,11 @@ export default async function AdminDashboardPage() {
 
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           <Stat label="Produtos" value={productCount.toString()} />
-          <Stat label="Encomendas" value="0" />
-          <Stat label="Clientes" value="0" />
+          <Stat label="Encomendas" value={orderCount.toString()} />
+          <Stat label="Clientes" value={customerCount.toString()} />
         </div>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-4">
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
           <AdminLink
             href="/admin/products"
             title="Produtos"
@@ -59,11 +62,6 @@ export default async function AdminDashboardPage() {
             href="/admin/customers"
             title="Clientes"
             text="Histórico e contactos"
-          />
-          <AdminLink
-            href="/admin/settings"
-            title="Definições"
-            text="Dados gerais da loja"
           />
         </div>
 

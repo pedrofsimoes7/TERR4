@@ -12,6 +12,7 @@ const barlow = Barlow({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://terr4.pt"),
   title: "TERR4 Outdoor Gear",
   description:
     "Rooftop tents e outdoor gear premium. Feito para quem quer ir mais longe.",
