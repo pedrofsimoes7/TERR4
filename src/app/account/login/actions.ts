@@ -65,11 +65,6 @@ export async function accountLoginAction(formData: FormData) {
     redirect("/account/login");
   }
 
-  if (!customer.emailVerifiedAt) {
-    await delay(800);
-    redirect("/account/check-email");
-  }
-
   await createCustomerSession({
     customerId: customer.id,
     email: customer.email,

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { CartLink } from "@/components/layout/cart-link";
 import { MobileMenu } from "@/components/layout/mobile-menu";
 import Image from "next/image";
+import { User } from "lucide-react";
 
 const nav = [
   { label: "Produtos", href: "/shop" },
@@ -62,9 +63,10 @@ export function Header() {
 
           <Link
             href="/account"
-            className="hidden rounded-full border border-white/15 bg-white/[0.05] px-5 py-2 text-xs font-black uppercase tracking-[0.14em] text-white transition duration-300 hover:bg-white hover:text-neutral-950 sm:inline-flex"
+            aria-label="Área de cliente"
+            className="hidden size-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-white transition duration-300 hover:bg-white hover:text-neutral-950 sm:inline-flex"
           >
-            Conta
+            <User size={17} />
           </Link>
 
           <Link
