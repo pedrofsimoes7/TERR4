@@ -52,7 +52,7 @@ export function MobileMenu({ nav }: { nav: NavItem[] }) {
           <>
             {/* Backdrop */}
             <motion.div
-              className="fixed inset-0 z-[79] bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-[998] bg-black/60 backdrop-blur-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -62,7 +62,7 @@ export function MobileMenu({ nav }: { nav: NavItem[] }) {
 
             {/* Panel */}
             <motion.div
-              className="fixed inset-0 z-[80] flex flex-col overflow-y-auto overscroll-contain bg-[#070706] text-white"
+              className="fixed inset-0 z-[999] flex flex-col overflow-y-auto overscroll-contain bg-[#070706] text-white"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
