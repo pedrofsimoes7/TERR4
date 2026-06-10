@@ -47,7 +47,7 @@ export default async function ProductPage({ params }: PageProps) {
         ];
 
   return (
-    <main className="bg-[#070706] pb-36 text-[#c8c4be] md:pb-0">
+    <main className="bg-[#070706] pb-56 text-[#c8c4be] md:pb-0">
       <section className="px-6 pb-20 pt-36">
         <div className="mx-auto max-w-7xl">
           <Reveal>
@@ -234,7 +234,7 @@ export default async function ProductPage({ params }: PageProps) {
       )}
 
       {product.price && product.status === "available" && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#070706]/92 px-4 py-3 backdrop-blur-xl md:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-[75] border-t border-white/10 bg-[#070706] px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 shadow-[0_-24px_70px_rgba(0,0,0,0.9)] md:hidden">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#a79d8d]">

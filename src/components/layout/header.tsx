@@ -1,12 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
+import { User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { CartLink } from "@/components/layout/cart-link";
 import { MobileMenu } from "@/components/layout/mobile-menu";
-import Image from "next/image";
-import { User } from "lucide-react";
 
 const nav = [
   { label: "Produtos", href: "/shop" },
@@ -32,13 +32,11 @@ export function Header() {
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className={`fixed left-0 top-0 z-50 w-full transition-all duration-500 ${
         scrolled
-          ? "border-b border-white/10 bg-[#070706]/88 backdrop-blur-md"
-          : "bg-transparent"
+          ? "border-b border-white/10 bg-[#070706]/95 backdrop-blur-md"
+          : "bg-[#070706]/88 backdrop-blur-md md:bg-transparent md:backdrop-blur-0"
       }`}
     >
-      <div className="mx-auto flex h-[5.5rem] max-w-7xl items-center justify-between px-6">
-
-        {/* Logo */}
+      <div className="mx-auto flex h-[5rem] max-w-7xl items-center justify-between px-6 pt-[env(safe-area-inset-top)] md:h-[5.5rem] md:pt-0">
         <Link href="/" className="group flex items-center">
           <Image
             src="/images/terr4-logo-assets/terr4-logo-beige-transparent.png"
@@ -50,21 +48,19 @@ export function Header() {
           />
         </Link>
 
-        {/* Nav */}
         <nav className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/[0.035] p-1 backdrop-blur-xl md:flex">
           {nav.map((item) => (
             <NavLink key={item.href} href={item.href} label={item.label} />
           ))}
         </nav>
 
-        {/* Right actions */}
         <div className="flex items-center gap-3">
           <CartLink />
 
           <Link
             href="/account"
             aria-label="Área de cliente"
-            className="hidden size-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-white transition duration-300 hover:bg-white hover:text-neutral-950 sm:inline-flex"
+            className="flex size-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white backdrop-blur transition duration-300 hover:bg-white hover:text-neutral-950"
           >
             <User size={17} />
           </Link>
