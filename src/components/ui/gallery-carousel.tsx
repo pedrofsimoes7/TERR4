@@ -12,9 +12,6 @@ export function GalleryCarousel({ images }: { images: GalleryItem[] }) {
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
 
-  // arrastar
-  const drag = useRef({ active: false, startX: 0, scrollLeft: 0, moved: false });
-
   const updateArrows = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
@@ -30,7 +27,7 @@ export function GalleryCarousel({ images }: { images: GalleryItem[] }) {
     el.scrollBy({ left: dir * amount, behavior: "smooth" });
   }
 
-  // auto-play
+  // auto-play (pausa em hover no desktop, ou enquanto o utilizador interage)
   useEffect(() => {
     if (paused || images.length <= 1) return;
     const interval = setInterval(() => {
@@ -54,23 +51,27 @@ export function GalleryCarousel({ images }: { images: GalleryItem[] }) {
     return () => el.removeEventListener("scroll", updateArrows);
   }, [updateArrows]);
 
-  // handlers de arrastar
-  function onPointerDown(e: React.PointerEvent) {
+  // ── Arrastar com RATO (só desktop). No telemóvel o scroll de toque
+  //    nativo trata de tudo — não interferimos. ──
+  const drag = useRef({ active: false, startX: 0, scrollLeft: 0 });
+
+  function onMouseDown(e: React.MouseEvent) {
     const el = trackRef.current;
     if (!el) return;
-    drag.current = { active: true, startX: e.clientX, scrollLeft: el.scrollLeft, moved: false };
+    drag.current = { active: true, startX: e.pageX, scrollLeft: el.scrollLeft };
     setPaused(true);
   }
-  function onPointerMove(e: React.PointerEvent) {
+  function onMouseMove(e: React.MouseEvent) {
     const el = trackRef.current;
     if (!el || !drag.current.active) return;
-    const dx = e.clientX - drag.current.startX;
-    if (Math.abs(dx) > 4) drag.current.moved = true;
+    e.preventDefault();
+    const dx = e.pageX - drag.current.startX;
     el.scrollLeft = drag.current.scrollLeft - dx;
   }
-  function onPointerUp() {
+  function endDrag() {
+    if (!drag.current.active) return;
     drag.current.active = false;
-    setTimeout(() => setPaused(false), 1200);
+    setTimeout(() => setPaused(false), 1500);
   }
 
   if (images.length === 0) {
@@ -85,14 +86,14 @@ export function GalleryCarousel({ images }: { images: GalleryItem[] }) {
     <div
       className="group/gallery relative"
       onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      onMouseLeave={() => { setPaused(false); endDrag(); }}
     >
-      {/* setas */}
+      {/* setas (escondidas em telemóvel — lá usa-se o swipe nativo) */}
       <button
         type="button"
         onClick={() => scrollByCards(-1)}
         aria-label="Anterior"
-        className={`absolute left-3 top-1/2 z-20 flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/80 ${
+        className={`absolute left-3 top-1/2 z-20 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/80 sm:flex ${
           canLeft ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
@@ -102,40 +103,42 @@ export function GalleryCarousel({ images }: { images: GalleryItem[] }) {
         type="button"
         onClick={() => scrollByCards(1)}
         aria-label="Seguinte"
-        className={`absolute right-3 top-1/2 z-20 flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/80 ${
+        className={`absolute right-3 top-1/2 z-20 hidden size-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/80 sm:flex ${
           canRight ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
         <ChevronRight size={20} />
       </button>
 
-      {/* fades laterais */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[#070706] to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[#070706] to-transparent" />
+      {/* fades laterais (só desktop) */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden w-16 bg-gradient-to-r from-[#070706] to-transparent sm:block" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden w-16 bg-gradient-to-l from-[#070706] to-transparent sm:block" />
 
       {/* track */}
       <div
         ref={trackRef}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerLeave={onPointerUp}
-        className="no-scrollbar flex cursor-grab gap-5 overflow-x-auto scroll-smooth pb-4 active:cursor-grabbing"
-        style={{ scrollbarWidth: "none" }}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={endDrag}
+        className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 sm:cursor-grab sm:snap-none sm:active:cursor-grabbing"
+        style={{
+          scrollbarWidth: "none",
+          WebkitOverflowScrolling: "touch",
+        }}
       >
         {images.map((img, i) => (
           <figure
             key={img.id}
             data-card
-            className="relative aspect-[4/5] w-[78%] shrink-0 overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.03] sm:w-[48%] lg:w-[32%]"
+            className="relative aspect-[4/5] w-[82%] shrink-0 snap-center overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.03] sm:w-[48%] sm:snap-align-none lg:w-[32%]"
           >
             <Image
               src={img.url}
               alt={img.alt || `Galeria TERR4 ${i + 1}`}
               fill
               draggable={false}
-              className="select-none object-cover transition duration-700 hover:scale-[1.04]"
-              sizes="(max-width: 640px) 78vw, (max-width: 1024px) 48vw, 32vw"
+              className="select-none object-cover transition duration-700 sm:hover:scale-[1.04]"
+              sizes="(max-width: 640px) 82vw, (max-width: 1024px) 48vw, 32vw"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
           </figure>

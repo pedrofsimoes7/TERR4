@@ -29,18 +29,24 @@ export function Header() {
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: -12 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed inset-x-0 top-0 z-40 w-full transition-all duration-500 ${
+      className={`fixed inset-x-0 top-0 z-40 w-full transition-colors duration-500 ${
         scrolled
           ? "border-b border-white/10 bg-[#070706] md:bg-[#070706]/88 md:backdrop-blur-md"
           : "bg-[#070706] md:bg-transparent"
       }`}
-      // O padding-top inclui o safe-area: o fundo do header estende-se até
-      // ao topo real do ecrã (cobre o notch) sem deixar espaço vazio.
-      style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
+      {/* Faixa que cobre a status bar (notch / relógio) — garante que
+          NENHUM conteúdo do site passa por cima do header no iPhone.
+          Tem a mesma cor do header e a altura do safe-area. */}
+      <div
+        className={`w-full ${scrolled ? "" : "md:hidden"} `}
+        style={{ height: "env(safe-area-inset-top)" }}
+        aria-hidden
+      />
+
       <div className="mx-auto flex h-[5.5rem] max-w-7xl items-center justify-between px-6">
         <Link href="/" className="group flex items-center">
           <Image

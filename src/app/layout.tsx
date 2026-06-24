@@ -127,10 +127,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://terr4.pt",
   },
-  // ⬇️ Cola aqui o código do Google Search Console
-  verification: {
-    google: "COLA_AQUI_O_CODIGO_DO_GOOGLE",
-  },
 };
 
 export const viewport: Viewport = {
