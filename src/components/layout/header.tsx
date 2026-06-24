@@ -10,6 +10,7 @@ import { MobileMenu } from "@/components/layout/mobile-menu";
 
 const nav = [
   { label: "Produtos", href: "/shop" },
+  { label: "Alugueres", href: "/alugueres" },
   { label: "Galeria", href: "/galeria" },
   { label: "Sobre", href: "/about" },
   { label: "FAQ", href: "/faq" },
@@ -31,13 +32,16 @@ export function Header() {
       initial={{ opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed left-0 top-0 z-40 w-full transition-all duration-500 ${
+      className={`fixed inset-x-0 top-0 z-40 w-full transition-all duration-500 ${
         scrolled
           ? "border-b border-white/10 bg-[#070706] md:bg-[#070706]/88 md:backdrop-blur-md"
           : "bg-[#070706] md:bg-transparent"
       }`}
+      // O padding-top inclui o safe-area: o fundo do header estende-se até
+      // ao topo real do ecrã (cobre o notch) sem deixar espaço vazio.
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
-      <div className="mx-auto flex min-h-[calc(5.5rem+env(safe-area-inset-top))] max-w-7xl items-center justify-between px-6 pt-[env(safe-area-inset-top)] md:h-[5.5rem] md:min-h-0 md:pt-0">
+      <div className="mx-auto flex h-[5.5rem] max-w-7xl items-center justify-between px-6">
         <Link href="/" className="group flex items-center">
           <Image
             src="/images/terr4-logo-assets/terr4-logo-beige-transparent.png"

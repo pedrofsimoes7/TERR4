@@ -26,7 +26,6 @@ html, body {
   min-height: 100dvh;
   background: #070706;
   scroll-behavior: smooth;
-  /* iOS momentum scrolling */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -203,7 +202,7 @@ input:focus, textarea:focus, select:focus {
 
 /* ── Mobile sticky product bar ── */
 .mobile-sticky-cta {
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
 }
 
 @keyframes word-animate {
@@ -229,3 +228,9 @@ input:focus, textarea:focus, select:focus {
   scrollbar-width: none;
 }
  
+.pt-safe { padding-top: env(safe-area-inset-top); }
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+
+.fixed-bottom-safe {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}

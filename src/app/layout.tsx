@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Barlow } from "next/font/google";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -131,6 +131,14 @@ export const metadata: Metadata = {
   verification: {
     google: "COLA_AQUI_O_CODIGO_DO_GOOGLE",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover", // ← essencial para o notch/safe-area no iPhone
+  themeColor: "#070706",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { sendRentalApprovedEmail, sendRentalRejectedEmail } from "@/lib/email";
+import {
+  sendRentalApprovedEmail,
+  sendRentalRejectedEmail,
+  sendRentalCancelledEmail,
+} from "@/lib/email";
 
 export async function approveRentalAction(formData: FormData) {
   const id = String(formData.get("id") || "");
@@ -60,10 +64,23 @@ export async function cancelRentalAction(formData: FormData) {
   const id = String(formData.get("id") || "");
   if (!id) return;
 
-  await prisma.rental.update({
+  const rental = await prisma.rental.update({
     where: { id },
     data: { status: "CANCELLED" },
+    include: { product: true },
   });
+
+  try {
+    await sendRentalCancelledEmail({
+      customerName: rental.customerName,
+      customerEmail: rental.customerEmail,
+      productName: rental.product.name,
+      startDate: rental.startDate,
+      endDate: rental.endDate,
+    });
+  } catch (e) {
+    console.error("Erro a enviar email de cancelamento:", e);
+  }
 
   revalidatePath("/admin/rentals");
   revalidatePath("/admin");

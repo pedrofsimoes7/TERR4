@@ -1,108 +1,6 @@
 import { resend } from "@/lib/resend";
 
-export async function sendOrderPaidEmail({
-  customerName,
-  customerEmail,
-  orderId,
-  total,
-}: {
-  customerName: string;
-  customerEmail: string;
-  orderId: string;
-  total: number;
-}) {
-  const result = await resend.emails.send({
-    from: process.env.EMAIL_FROM!,
-    to: customerEmail,
-    subject: "Pagamento confirmado — TERR4",
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;">
-        <h1>Pagamento confirmado</h1>
-        <p>Olá ${customerName},</p>
-        <p>Confirmámos o pagamento da tua encomenda.</p>
-        <p><strong>Encomenda:</strong> ${orderId}</p>
-        <p><strong>Total:</strong> €${(total / 100).toFixed(2)}</p>
-        <p>A nossa equipa irá preparar o envio e receberás novas atualizações quando a encomenda for processada.</p>
-        <hr style="margin:30px 0;border:none;border-top:1px solid #ddd;" />
-        <p style="font-size:14px;color:#666;">TERR4 Outdoor Gear</p>
-        <div style="margin-top:32px;text-align:center;">
-            <img
-              src="${process.env.NEXT_PUBLIC_APP_URL}/images/terr4-logo-assets/terr4-logo-black-transparent.png"
-              alt="TERR4 Outdoor Gear"
-              style="width:160px;height:auto;display:inline-block;"
-            />
-          </div>
-      </div>
-    `,
-  });
-
-  return result.data?.id;
-}
-
-export async function sendCustomerVerificationEmail({
-  customerName,
-  customerEmail,
-  verificationUrl,
-}: {
-  customerName: string;
-  customerEmail: string;
-  verificationUrl: string;
-}) {
-  const result = await resend.emails.send({
-    from: process.env.EMAIL_FROM!,
-    to: customerEmail,
-    subject: "Confirma a tua conta!",
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;">
-        <h1>Confirma a tua conta</h1>
-
-        <p>Olá ${customerName || "cliente"},</p>
-
-        <p>
-          Obrigado por criares conta na TERR4. Para ativares a tua conta, confirma o teu email no botão abaixo.
-        </p>
-
-        <p style="margin:30px 0;">
-          <a
-            href="${verificationUrl}"
-            style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:14px 22px;border-radius:999px;font-weight:bold;"
-          >
-            Confirmar email
-          </a>
-        </p>
-
-        <p style="font-size:14px;color:#666;">
-          Este link expira em 24 horas.
-        </p>
-
-        <hr style="margin:30px 0;border:none;border-top:1px solid #ddd;" />
-
-        <p style="font-size:14px;color:#666;">
-          TERR4 Outdoor Gear
-        </p>
-        
-        <div style="margin-top:32px;text-align:center;">
-            <img
-              src="${process.env.NEXT_PUBLIC_APP_URL}/images/terr4-logo-assets/terr4-logo-black-transparent.png"
-              alt="TERR4 Outdoor Gear"
-              style="width:160px;height:auto;display:inline-block;"
-            />
-          </div>
-      </div>
-    `,
-  });
-
-  return result.data?.id;
-}
-
-// ════════════════════════════════════════════════════════════════════
-// ADICIONA ESTAS FUNÇÕES ao teu ficheiro existente src/lib/email.ts
-// (no fim do ficheiro, depois das que já tens. NÃO apagues nada.)
-//
-// Já tens `import { resend } from "@/lib/resend";` no topo — reutiliza-se.
-// ════════════════════════════════════════════════════════════════════
-
-// Email interno do negócio (onde o teu pai recebe avisos)
+// Email do negócio (avisos internos + para onde vão as respostas dos clientes)
 const ADMIN_EMAIL = "terr4geral@gmail.com";
 
 // ── Helpers partilhados ─────────────────────────────────────────────
@@ -124,12 +22,85 @@ function emailFooter() {
         alt="TERR4 Outdoor Gear"
         style="width:160px;height:auto;display:inline-block;"
       />
+      <p style="margin-top:14px;font-size:13px;color:#888;">
+        <a href="mailto:${ADMIN_EMAIL}" style="color:#c46a2d;text-decoration:none;">${ADMIN_EMAIL}</a>
+      </p>
     </div>
   `;
 }
 
 // ════════════════════════════════════════════════════════════════════
-// 1. ALUGUER — pedido recebido (→ cliente)
+// CLIENTE — pagamento confirmado
+// ════════════════════════════════════════════════════════════════════
+export async function sendOrderPaidEmail({
+  customerName,
+  customerEmail,
+  orderId,
+  total,
+}: {
+  customerName: string;
+  customerEmail: string;
+  orderId: string;
+  total: number;
+}) {
+  const result = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to: customerEmail,
+    replyTo: ADMIN_EMAIL,
+    subject: "Pagamento confirmado — TERR4",
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;">
+        <h1>Pagamento confirmado</h1>
+        <p>Olá ${customerName},</p>
+        <p>Confirmámos o pagamento da tua encomenda.</p>
+        <p><strong>Encomenda:</strong> ${orderId}</p>
+        <p><strong>Total:</strong> €${(total / 100).toFixed(2)}</p>
+        <p>A nossa equipa irá preparar o envio e receberás novas atualizações quando a encomenda for processada.</p>
+        ${emailFooter()}
+      </div>
+    `,
+  });
+  return result.data?.id;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CLIENTE — confirmação de conta
+// ════════════════════════════════════════════════════════════════════
+export async function sendCustomerVerificationEmail({
+  customerName,
+  customerEmail,
+  verificationUrl,
+}: {
+  customerName: string;
+  customerEmail: string;
+  verificationUrl: string;
+}) {
+  const result = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to: customerEmail,
+    replyTo: ADMIN_EMAIL,
+    subject: "Confirma a tua conta!",
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;">
+        <h1>Confirma a tua conta</h1>
+        <p>Olá ${customerName || "cliente"},</p>
+        <p>Obrigado por criares conta na TERR4. Para ativares a tua conta, confirma o teu email no botão abaixo.</p>
+        <p style="margin:30px 0;">
+          <a href="${verificationUrl}"
+            style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:14px 22px;border-radius:999px;font-weight:bold;">
+            Confirmar email
+          </a>
+        </p>
+        <p style="font-size:14px;color:#666;">Este link expira em 24 horas.</p>
+        ${emailFooter()}
+      </div>
+    `,
+  });
+  return result.data?.id;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CLIENTE — pedido de aluguer recebido
 // ════════════════════════════════════════════════════════════════════
 export async function sendRentalRequestEmail({
   customerName,
@@ -151,7 +122,8 @@ export async function sendRentalRequestEmail({
   const result = await resend.emails.send({
     from: process.env.EMAIL_FROM!,
     to: customerEmail,
-    subject: "Pedido de aluguer recebido — TERR4",
+    replyTo: ADMIN_EMAIL,
+    subject: "Pedido de aluguer recebido",
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;">
         <h1>Pedido de aluguer recebido</h1>
@@ -171,7 +143,7 @@ export async function sendRentalRequestEmail({
 }
 
 // ════════════════════════════════════════════════════════════════════
-// 2. ALUGUER — aprovado (→ cliente)
+// CLIENTE — aluguer aprovado
 // ════════════════════════════════════════════════════════════════════
 export async function sendRentalApprovedEmail({
   customerName,
@@ -189,7 +161,8 @@ export async function sendRentalApprovedEmail({
   const result = await resend.emails.send({
     from: process.env.EMAIL_FROM!,
     to: customerEmail,
-    subject: "Reserva confirmada — TERR4",
+    replyTo: ADMIN_EMAIL,
+    subject: "Reserva confirmada",
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;">
         <h1>Reserva confirmada</h1>
@@ -208,7 +181,7 @@ export async function sendRentalApprovedEmail({
 }
 
 // ════════════════════════════════════════════════════════════════════
-// 3. ALUGUER — rejeitado (→ cliente)
+// CLIENTE — aluguer rejeitado
 // ════════════════════════════════════════════════════════════════════
 export async function sendRentalRejectedEmail({
   customerName,
@@ -226,7 +199,8 @@ export async function sendRentalRejectedEmail({
   const result = await resend.emails.send({
     from: process.env.EMAIL_FROM!,
     to: customerEmail,
-    subject: "Sobre o teu pedido de aluguer — TERR4",
+    replyTo: ADMIN_EMAIL,
+    subject: "Sobre o teu pedido de aluguer",
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;">
         <h1>Pedido de aluguer</h1>
@@ -247,7 +221,47 @@ export async function sendRentalRejectedEmail({
 }
 
 // ════════════════════════════════════════════════════════════════════
-// 4. INTERNO — novo pedido de aluguer (→ terr4geral)
+// CLIENTE — aluguer cancelado (reserva aprovada que foi cancelada)
+// ════════════════════════════════════════════════════════════════════
+export async function sendRentalCancelledEmail({
+  customerName,
+  customerEmail,
+  productName,
+  startDate,
+  endDate,
+}: {
+  customerName: string;
+  customerEmail: string;
+  productName: string;
+  startDate: Date;
+  endDate: Date;
+}) {
+  const result = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to: customerEmail,
+    replyTo: ADMIN_EMAIL,
+    subject: "Reserva cancelada — TERR4",
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;">
+        <h1>Reserva cancelada</h1>
+        <p>Olá ${customerName},</p>
+        <p>A tua reserva da <strong>${productName}</strong> para as datas de ${formatDatePT(startDate)} a ${formatDatePT(endDate)} foi cancelada.</p>
+        <p>Se isto foi engano ou quiseres remarcar, fala connosco — estamos aqui para ajudar.</p>
+        <p style="margin:30px 0;">
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/alugueres"
+            style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:14px 22px;border-radius:999px;font-weight:bold;">
+            Fazer nova reserva
+          </a>
+        </p>
+        ${emailFooter()}
+      </div>
+    `,
+  });
+  return result.data?.id;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// INTERNO — novo pedido de aluguer (→ terr4geral)
 // ════════════════════════════════════════════════════════════════════
 export async function sendAdminNewRentalEmail({
   customerName,
@@ -269,6 +283,7 @@ export async function sendAdminNewRentalEmail({
   const result = await resend.emails.send({
     from: process.env.EMAIL_FROM!,
     to: ADMIN_EMAIL,
+    replyTo: customerEmail,
     subject: `Novo pedido de aluguer — ${customerName}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;">
@@ -296,7 +311,7 @@ export async function sendAdminNewRentalEmail({
 }
 
 // ════════════════════════════════════════════════════════════════════
-// 5. INTERNO — nova encomenda paga (→ terr4geral)
+// INTERNO — nova encomenda paga (→ terr4geral)
 // ════════════════════════════════════════════════════════════════════
 export async function sendAdminNewOrderEmail({
   customerName,
@@ -312,6 +327,7 @@ export async function sendAdminNewOrderEmail({
   const result = await resend.emails.send({
     from: process.env.EMAIL_FROM!,
     to: ADMIN_EMAIL,
+    replyTo: customerEmail,
     subject: `Nova encomenda — ${customerName}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;">
@@ -337,7 +353,7 @@ export async function sendAdminNewOrderEmail({
 }
 
 // ════════════════════════════════════════════════════════════════════
-// 6. INTERNO — stock baixo (→ terr4geral)
+// INTERNO — stock baixo (→ terr4geral)
 // ════════════════════════════════════════════════════════════════════
 export async function sendAdminLowStockEmail({
   productName,
@@ -367,4 +383,3 @@ export async function sendAdminLowStockEmail({
   });
   return result.data?.id;
 }
-
