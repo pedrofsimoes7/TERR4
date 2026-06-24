@@ -34,7 +34,7 @@ export function Hero() {
   const words3 = ["ends."];
 
   return (
-    <section ref={ref} className="relative min-h-screen overflow-hidden bg-[#070706] text-white">
+    <section ref={ref} className="relative min-h-[100dvh] overflow-hidden bg-[#070706] text-white">
 
       {/* Parallax bg */}
       <motion.div className="absolute inset-0" style={{ y: bgY, scale: bgScale, opacity: bgOpacity }}>
@@ -49,7 +49,7 @@ export function Hero() {
 
       {/* Content */}
       <motion.div style={{ y: textY, opacity: fade }}
-        className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col justify-end px-6 pb-14 pt-32">
+        className="relative z-10 mx-auto flex min-h-[100dvh] max-w-7xl flex-col justify-end px-6 pb-14 pt-32">
 
         <div className="grid gap-8 lg:grid-cols-[1fr_290px] lg:items-end">
           <div>
@@ -77,16 +77,6 @@ export function Hero() {
             animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
             transition={{ duration: 1, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* <div className="rounded-2xl border border-white/10 bg-black/50 p-5 backdrop-blur-2xl
-              transition-all duration-500 hover:border-white/18 hover:shadow-[0_0_48px_rgba(196,106,45,0.14)]">
-              <p className="text-sm leading-[1.8] text-white/58">
-                Equipamento premium para transformar qualquer veículo numa base confortável e pronta para aventura.
-              </p>
-              <div className="mt-5 flex flex-col gap-2">
-                <CTALink href="/shop" primary>Explorar produtos</CTALink>
-                <CTALink href="/contact">Pedir informação</CTALink>
-              </div>
-            </div> */}
             <div className="max-w-[300px] border-l border-white/15 pl-5">
               <p className="text-sm leading-[1.8] text-white/62">
                 Equipamento premium para transformar qualquer veículo numa base confortável e pronta para aventura.
