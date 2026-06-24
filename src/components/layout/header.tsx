@@ -48,7 +48,7 @@ export function Header() {
           />
         </Link>
 
-        <nav className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/[0.035] p-1 backdrop-blur-xl md:flex">
+        <nav className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/[0.035] p-1 backdrop-blur-xl lg:flex">
           {nav.map((item) => (
             <NavLink key={item.href} href={item.href} label={item.label} />
           ))}
@@ -66,10 +66,10 @@ export function Header() {
           </Link>
 
           <Link
-            href="/contact"
+            href="/alugueres"
             className="btn-wipe hidden rounded-full bg-[#f4efe4] px-5 py-2 text-xs font-black uppercase tracking-[0.14em] text-neutral-950 transition duration-300 hover:bg-white xl:inline-flex"
           >
-            Falar connosco
+            Alugar tenda
           </Link>
 
           <MobileMenu nav={nav} />

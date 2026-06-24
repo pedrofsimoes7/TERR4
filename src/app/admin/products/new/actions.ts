@@ -6,10 +6,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
 function parseLines(value: string) {
-  return value
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+  return value.split("\n").map((l) => l.trim()).filter(Boolean);
 }
 
 function parseLabelValueLines(value: string) {
@@ -19,11 +16,7 @@ function parseLabelValueLines(value: string) {
     .filter(Boolean)
     .map((line) => {
       const [label, ...rest] = line.split(":");
-
-      return {
-        label: label?.trim() || "",
-        value: rest.join(":").trim(),
-      };
+      return { label: label?.trim() || "", value: rest.join(":").trim() };
     })
     .filter((item) => item.label && item.value);
 }
@@ -35,11 +28,7 @@ function parseFeatureLines(value: string) {
     .filter(Boolean)
     .map((line) => {
       const [title, ...rest] = line.split(":");
-
-      return {
-        title: title?.trim() || "",
-        text: rest.join(":").trim(),
-      };
+      return { title: title?.trim() || "", text: rest.join(":").trim() };
     })
     .filter((item) => item.title && item.text);
 }
@@ -53,7 +42,6 @@ export async function createProductAction(formData: FormData) {
   const status = String(formData.get("status") || "DRAFT") as ProductStatus;
   const shortDescription = String(formData.get("shortDescription") || "").trim();
   const description = String(formData.get("description") || "").trim();
-  const imageUrl = String(formData.get("imageUrl") || "/images/hero-jeep.jpeg").trim();
 
   const specs = parseLabelValueLines(String(formData.get("specs") || ""));
   const included = parseLines(String(formData.get("included") || ""));
@@ -61,6 +49,19 @@ export async function createProductAction(formData: FormData) {
   const trustItems = parseLabelValueLines(String(formData.get("trustItems") || ""));
   const warranty = String(formData.get("warranty") || "").trim();
   const compatibility = String(formData.get("compatibility") || "").trim();
+
+  // ── Imagens do gestor de upload ──
+  const imageCount = Number(formData.get("imageCount") || 0);
+  const imageUrls: string[] = [];
+  for (let i = 0; i < imageCount; i++) {
+    const url = String(formData.get(`imageUrl_${i}`) || "").trim();
+    if (url) imageUrls.push(url);
+  }
+
+  // Fallback se não houver fotos
+  if (imageUrls.length === 0) {
+    imageUrls.push("/images/hero-jeep.jpeg");
+  }
 
   await prisma.product.create({
     data: {
@@ -79,7 +80,11 @@ export async function createProductAction(formData: FormData) {
       warranty: warranty || null,
       compatibility: compatibility || null,
       images: {
-        create: [{ url: imageUrl, alt: name, sortOrder: 0 }],
+        create: imageUrls.map((url, index) => ({
+          url,
+          alt: name,
+          sortOrder: index,
+        })),
       },
     },
   });

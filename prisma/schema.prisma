@@ -37,6 +37,7 @@ model Product {
   trustItemsJson    String        @default("[]")
   warranty         String?
   compatibility    String?
+  rentals          Rental[]
 
   images           ProductImage[]
   orderItems       OrderItem[]
@@ -136,4 +137,45 @@ model OrderItem {
 
   productId  String?
   product    Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+enum RentalStatus {
+  PENDING    // pedido recebido, à espera de aprovação
+  APPROVED   // aprovado pelo admin
+  REJECTED   // rejeitado pelo admin
+  CANCELLED  // cancelado
+}
+
+model Rental {
+  id            String       @id @default(cuid())
+
+  // Produto alugado
+  productId     String
+  product       Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // Datas do aluguer
+  startDate     DateTime
+  endDate       DateTime
+
+  // Dados do cliente
+  customerName  String
+  customerEmail String
+  customerPhone String?
+
+  // Valores (simulados — caução + total)
+  depositCents  Int          @default(0)
+  totalCents    Int          @default(0)
+
+  // Estado
+  status        RentalStatus @default(PENDING)
+
+  // Notas
+  notes         String?
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([productId])
+  @@index([status])
+  @@index([startDate, endDate])
 }

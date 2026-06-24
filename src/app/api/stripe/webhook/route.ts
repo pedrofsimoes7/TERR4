@@ -2,17 +2,18 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
-import { sendOrderPaidEmail } from "@/lib/email";
+import {
+  sendOrderPaidEmail,
+  sendAdminNewOrderEmail,
+  sendAdminLowStockEmail,
+} from "@/lib/email";
 
 export async function POST(request: Request) {
   const body = await request.text();
   const signature = request.headers.get("stripe-signature");
 
   if (!signature) {
-    return NextResponse.json(
-      { error: "Missing stripe signature" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Missing stripe signature" }, { status: 400 });
   }
 
   let event: Stripe.Event;
@@ -24,10 +25,7 @@ export async function POST(request: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch {
-    return NextResponse.json(
-      { error: "Invalid webhook signature" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid webhook signature" }, { status: 400 });
   }
 
   if (event.type === "payment_intent.succeeded") {
@@ -56,9 +54,11 @@ export async function POST(request: Request) {
         paidAt: existingOrder.paidAt ?? new Date(),
         stripePaymentIntentId: paymentIntent.id,
       },
+      include: { items: true },
     });
 
     if (!alreadyPaid && !alreadySentEmail) {
+      // 1) Email ao cliente (confirmação de pagamento)
       try {
         const emailId = await sendOrderPaidEmail({
           customerName: order.customerName,
@@ -69,13 +69,51 @@ export async function POST(request: Request) {
 
         await prisma.order.update({
           where: { id: order.id },
-          data: {
-            invoiceSentAt: new Date(),
-            invoiceEmailId: emailId,
-          },
+          data: { invoiceSentAt: new Date(), invoiceEmailId: emailId },
         });
       } catch (error) {
         console.error("Failed to send order paid email:", error);
+      }
+
+      // 2) Aviso interno ao terr4geral (nova encomenda)
+      try {
+        await sendAdminNewOrderEmail({
+          customerName: order.customerName,
+          customerEmail: order.customerEmail,
+          orderId: order.id,
+          total: order.totalCents,
+        });
+      } catch (error) {
+        console.error("Failed to send admin new order email:", error);
+      }
+
+      // 3) Decrementar stock + avisar se chegar a <=1 unidade
+      for (const item of order.items) {
+        if (!item.productId) continue;
+
+        try {
+          const product = await prisma.product.findUnique({
+            where: { id: item.productId },
+          });
+
+          if (!product) continue;
+
+          const newStock = Math.max(0, product.stock - item.quantity);
+
+          await prisma.product.update({
+            where: { id: product.id },
+            data: { stock: newStock },
+          });
+
+          if (newStock <= 1) {
+            await sendAdminLowStockEmail({
+              productName: product.name,
+              stock: newStock,
+            });
+          }
+        } catch (error) {
+          console.error("Failed to update stock / send low stock email:", error);
+        }
       }
     }
   }

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Check, Package, Ruler, Shield, Truck } from "lucide-react";
+import { ArrowLeft, Check, Package, Ruler, Shield, Truck, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AddToCartButton } from "@/components/ui/add-to-cart-button";
 import { Reveal, StaggerReveal, StaggerItem } from "@/components/motion/reveal";
@@ -16,19 +16,17 @@ type PageProps = {
 const trustIcons = [Truck, Shield, Package];
 const featureIcons = [Ruler, Shield, Package];
 
+const RENTAL_SLUG = "terr4-start";
+
 export async function generateStaticParams() {
   const products = await getProducts();
-
   return products.map((product) => ({ slug: product.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-
-  return {
-    title: product ? `${product.name} | TERR4` : "Produto | TERR4",
-  };
+  return { title: product ? `${product.name} | TERR4` : "Produto | TERR4" };
 }
 
 export default async function ProductPage({ params }: PageProps) {
@@ -36,6 +34,8 @@ export default async function ProductPage({ params }: PageProps) {
   const product = await getProductBySlug(slug);
 
   if (!product) notFound();
+
+  const isRentable = product.slug === RENTAL_SLUG;
 
   const trustItems =
     product.trustItems.length > 0
@@ -51,26 +51,15 @@ export default async function ProductPage({ params }: PageProps) {
       <section className="px-6 pb-20 pt-36">
         <div className="mx-auto max-w-7xl">
           <Reveal>
-            <Link
-              href="/shop"
-              className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.12em] text-[#c8c4be]/45 transition hover:text-white"
-            >
-              <ArrowLeft size={14} />
-              Voltar à loja
+            <Link href="/shop"
+              className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.12em] text-[#c8c4be]/45 transition hover:text-white">
+              <ArrowLeft size={14} /> Voltar à loja
             </Link>
           </Reveal>
 
           <div className="mt-10 grid gap-10 lg:grid-cols-[1.12fr_0.88fr] lg:items-start">
             <Reveal delay={0.05}>
-
-              <ProductGallery
-
-                images={product.images}
-
-                alt={product.name}
-
-              />
-
+              <ProductGallery images={product.images} alt={product.name} />
             </Reveal>
 
             <Reveal delay={0.15}>
@@ -96,22 +85,33 @@ export default async function ProductPage({ params }: PageProps) {
 
                   <div className="mt-8 grid gap-3 sm:grid-cols-2">
                     <AddToCartButton product={product} />
-                    <Button href="/contact" variant="secondary">
-                      Reservar
-                    </Button>
+                    <Button href="/contact" variant="secondary">Reservar</Button>
                   </div>
+
+                  {/* Link para aluguer (só TERR4 Start) */}
+                  {isRentable && (
+                    <Link
+                      href="/alugueres"
+                      className="mt-3 flex items-center justify-between rounded-2xl border border-[#c46a2d]/25 bg-[#c46a2d]/8 px-5 py-4 transition duration-300 hover:border-[#c46a2d]/50 hover:bg-[#c46a2d]/12"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="flex size-9 items-center justify-center rounded-full bg-[#c46a2d]/20 text-[#c46a2d]">
+                          <Calendar size={16} />
+                        </span>
+                        <div>
+                          <p className="text-sm font-black text-white">Preferes alugar?</p>
+                          <p className="text-xs text-[#c8c4be]/50">A partir de 40€/dia</p>
+                        </div>
+                      </div>
+                      <span className="text-[#c46a2d]">→</span>
+                    </Link>
+                  )}
 
                   <div className="mt-8 grid gap-3 sm:grid-cols-3">
                     {trustItems.slice(0, 3).map((item, index) => {
                       const Icon = trustIcons[index] ?? Package;
-
                       return (
-                        <MiniTrust
-                          key={`${item.label}-${item.value}`}
-                          icon={<Icon size={16} />}
-                          label={item.label}
-                          value={item.value}
-                        />
+                        <MiniTrust key={`${item.label}-${item.value}`} icon={<Icon size={16} />} label={item.label} value={item.value} />
                       );
                     })}
                   </div>
@@ -127,14 +127,9 @@ export default async function ProductPage({ params }: PageProps) {
           <StaggerReveal className="mx-auto grid max-w-7xl gap-5 md:grid-cols-3">
             {product.features.slice(0, 3).map((feature, index) => {
               const Icon = featureIcons[index] ?? Package;
-
               return (
                 <StaggerItem key={`${feature.title}-${index}`}>
-                  <Feature
-                    icon={<Icon size={22} />}
-                    title={feature.title}
-                    text={feature.text}
-                  />
+                  <Feature icon={<Icon size={22} />} title={feature.title} text={feature.text} />
                 </StaggerItem>
               );
             })}
@@ -146,14 +141,10 @@ export default async function ProductPage({ params }: PageProps) {
         <section className="px-6 py-24">
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.85fr_1.15fr]">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.35em] text-[#a79d8d]">
-                Detalhes técnicos
-              </p>
-
+              <p className="text-xs font-black uppercase tracking-[0.35em] text-[#a79d8d]">Detalhes técnicos</p>
               <h2 className="mt-5 max-w-xl text-5xl font-black leading-[0.95] tracking-[-0.04em] text-white md:text-6xl">
                 Detalhes pensados para uso real.
               </h2>
-
               <p className="mt-6 max-w-xl text-lg leading-8 text-[#c8c4be]/65">
                 Consulta as características principais deste produto TERR4.
               </p>
@@ -163,24 +154,15 @@ export default async function ProductPage({ params }: PageProps) {
               {product.specs.length > 0 ? (
                 <div className="grid gap-px sm:grid-cols-2">
                   {product.specs.map((spec) => (
-                    <div
-                      key={spec.label}
-                      className="group border-t border-white/10 bg-[#151411] p-5 transition-colors duration-200 hover:bg-white/[0.05]"
-                    >
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/30">
-                        {spec.label}
-                      </p>
-
-                      <p className="mt-3 text-lg font-black text-white transition-colors duration-200 group-hover:text-[#f4efe4]">
-                        {spec.value}
-                      </p>
+                    <div key={spec.label}
+                      className="group border-t border-white/10 bg-[#151411] p-5 transition-colors duration-200 hover:bg-white/[0.05]">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-white/30">{spec.label}</p>
+                      <p className="mt-3 text-lg font-black text-white transition-colors duration-200 group-hover:text-[#f4efe4]">{spec.value}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="p-5 text-sm text-[#c8c4be]/55">
-                  Detalhes técnicos em breve.
-                </p>
+                <p className="p-5 text-sm text-[#c8c4be]/55">Detalhes técnicos em breve.</p>
               )}
             </div>
           </div>
@@ -200,7 +182,6 @@ export default async function ProductPage({ params }: PageProps) {
                           <span className="flex size-7 items-center justify-center rounded-full bg-[#2a2520] text-white">
                             <Check size={14} />
                           </span>
-
                           <span className="font-bold">{item}</span>
                         </div>
                       ))}
@@ -212,9 +193,7 @@ export default async function ProductPage({ params }: PageProps) {
               {product.compatibility && (
                 <StaggerItem>
                   <InfoPanel title="Compatibilidade">
-                    <p className="text-sm leading-7 text-[#2a2520]/75">
-                      {product.compatibility}
-                    </p>
+                    <p className="text-sm leading-7 text-[#2a2520]/75">{product.compatibility}</p>
                   </InfoPanel>
                 </StaggerItem>
               )}
@@ -222,9 +201,7 @@ export default async function ProductPage({ params }: PageProps) {
               {product.warranty && (
                 <StaggerItem>
                   <InfoPanel title="Garantia">
-                    <p className="text-sm leading-7 text-[#2a2520]/75">
-                      {product.warranty}
-                    </p>
+                    <p className="text-sm leading-7 text-[#2a2520]/75">{product.warranty}</p>
                   </InfoPanel>
                 </StaggerItem>
               )}
@@ -237,15 +214,9 @@ export default async function ProductPage({ params }: PageProps) {
         <div className="fixed inset-x-0 bottom-0 z-[80] border-t border-white/10 bg-[#070706] px-4 pt-3 pb-[calc(20px+env(safe-area-inset-bottom))] md:hidden">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#a79d8d]">
-                {product.name}
-              </p>
-
-              <p className="text-xl font-black text-white">
-                {formatPrice(product.price)}
-              </p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#a79d8d]">{product.name}</p>
+              <p className="text-xl font-black text-white">{formatPrice(product.price)}</p>
             </div>
-
             <div className="w-[180px]">
               <AddToCartButton product={product} />
             </div>
@@ -256,67 +227,31 @@ export default async function ProductPage({ params }: PageProps) {
   );
 }
 
-function MiniTrust({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
+function MiniTrust({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="stat-shimmer rounded-2xl border-t border-white/15 bg-white/[0.04] p-4 transition-colors duration-200 hover:bg-white/[0.08]">
       <div className="text-[#e8e0d4]">{icon}</div>
-      <p className="mt-3 text-[10px] font-black uppercase tracking-[0.22em] text-white/35">
-        {label}
-      </p>
+      <p className="mt-3 text-[10px] font-black uppercase tracking-[0.22em] text-white/35">{label}</p>
       <p className="mt-1 text-sm font-black text-white">{value}</p>
     </div>
   );
 }
 
-function Feature({
-  icon,
-  title,
-  text,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  text: string;
-}) {
+function Feature({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
     <div className="card-hover-glow group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#151411] p-7 transition duration-300">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
-      <div className="text-[#e8e0d4] transition duration-300 group-hover:scale-110 group-hover:text-white">
-        {icon}
-      </div>
-
-      <h3 className="mt-6 text-2xl font-black leading-none text-white">
-        {title}
-      </h3>
-
-      <p className="mt-4 text-sm leading-6 text-[#c8c4be]/60">
-        {text}
-      </p>
+      <div className="text-[#e8e0d4] transition duration-300 group-hover:scale-110 group-hover:text-white">{icon}</div>
+      <h3 className="mt-6 text-2xl font-black leading-none text-white">{title}</h3>
+      <p className="mt-4 text-sm leading-6 text-[#c8c4be]/60">{text}</p>
     </div>
   );
 }
 
-function InfoPanel({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function InfoPanel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="h-full rounded-[2rem] border border-black/8 bg-[#f1ebe1] p-7">
-      <h2 className="text-3xl font-black tracking-[-0.03em] text-[#1a1714]">
-        {title}
-      </h2>
-
+      <h2 className="text-3xl font-black tracking-[-0.03em] text-[#1a1714]">{title}</h2>
       <div className="mt-5 text-[#1a1714]/72">{children}</div>
     </div>
   );

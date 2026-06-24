@@ -65,6 +65,11 @@ export async function accountLoginAction(formData: FormData) {
     redirect("/account/login");
   }
 
+  // Bloquear login se o email ainda não foi confirmado
+  if (!customer.emailVerifiedAt) {
+    redirect("/account/check-email");
+  }
+
   await createCustomerSession({
     customerId: customer.id,
     email: customer.email,
