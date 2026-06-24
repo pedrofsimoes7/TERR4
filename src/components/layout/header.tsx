@@ -10,6 +10,7 @@ import { MobileMenu } from "@/components/layout/mobile-menu";
 
 const nav = [
   { label: "Produtos", href: "/shop" },
+  { label: "Galeria", href: "/galeria" },
   { label: "Sobre", href: "/about" },
   { label: "FAQ", href: "/faq" },
   { label: "Contacto", href: "/contact" },

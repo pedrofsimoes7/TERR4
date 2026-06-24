@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { CopyCustomerEmailsButton } from "@/components/admin/copy-customer-emails-button";
 
+export const dynamic = "force-dynamic";
+
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("pt-PT", {
     day: "2-digit",

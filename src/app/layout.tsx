@@ -12,20 +12,124 @@ const barlow = Barlow({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://terr4.pt"),
-  title: "TERR4 Outdoor Gear",
-  description:
-    "Rooftop tents e outdoor gear premium. Feito para quem quer ir mais longe.",
-
-  icons: {
-    icon: "/images/terr4-logo-assets/favicon-black.ico",
-    shortcut: "/images/terr4-logo-assets/favicon-black.ico",
+  metadataBase: new URL("https://terr4.pt"),
+  title: {
+    default: "TERR4 Outdoor Gear — Tendas de tejadilho e equipamento de aventura",
+    template: "%s | TERR4 Outdoor Gear",
   },
+  description:
+    "TERR4 Outdoor Gear — tendas de tejadilho, alugueres e equipamento para campismo e roadtrips. Transforma qualquer veículo numa base de aventura. Envio para todo o Portugal.",
+  keywords: [
+    // Marca
+    "TERR4",
+    "TERR4 Outdoor Gear",
+    "TERR4 Portugal",
+    "TERR4 tenda",
+    // Produto principal — tenda de tejadilho
+    "tenda de tejadilho",
+    "tenda de tejadilho Portugal",
+    "tenda de tejadilho para carro",
+    "tenda de tejadilho preço",
+    "comprar tenda de tejadilho",
+    "tenda de tejadilho softshell",
+    "tenda de tejadilho hardshell",
+    "rooftop tent",
+    "rooftop tent Portugal",
+    "roof tent",
+    "car roof tent",
+    "tenda para carro",
+    "tenda para jipe",
+    "tenda 4x4",
+    "tenda para roadtrip",
+    "tenda de carro tejadilho",
+    // Aluguer
+    "aluguer tenda de tejadilho",
+    "alugar tenda de tejadilho",
+    "aluguer tenda tejadilho Portugal",
+    "rooftop tent rental",
+    "aluguer equipamento campismo",
+    "alugar tenda carro",
+    // Campismo / outdoor
+    "campismo",
+    "campismo Portugal",
+    "equipamento de campismo",
+    "equipamento campismo Portugal",
+    "material de campismo",
+    "loja de campismo online",
+    "outdoor gear",
+    "outdoor gear Portugal",
+    "equipamento outdoor",
+    "acessórios campismo",
+    "campismo selvagem",
+    "overlanding",
+    "overlanding Portugal",
+    "vanlife",
+    "vanlife Portugal",
+    // Roadtrip / aventura
+    "roadtrip",
+    "roadtrip Portugal",
+    "viagem de carro",
+    "aventura outdoor",
+    "viagens 4x4",
+    "acampar no carro",
+    "dormir no carro",
+    // Produtos secundários
+    "cadeira de campismo",
+    "cadeira dobrável campismo",
+    "caneca de campismo",
+    "caneca esmaltada",
+    "acessórios outdoor",
+    // Long-tail / intenção
+    "melhor tenda de tejadilho",
+    "tenda de tejadilho barata",
+    "onde comprar tenda de tejadilho em Portugal",
+    "tenda tejadilho 2 pessoas",
+    "tenda tejadilho universal",
+  ],
+  authors: [{ name: "TERR4 Outdoor Gear" }],
+  creator: "TERR4 Outdoor Gear",
+  publisher: "TERR4 Outdoor Gear",
+  category: "Outdoor & Camping Gear",
   openGraph: {
+    type: "website",
+    locale: "pt_PT",
+    url: "https://terr4.pt",
+    siteName: "TERR4 Outdoor Gear",
+    title: "TERR4 Outdoor Gear — Tendas de tejadilho e equipamento de aventura",
+    description:
+      "Tendas de tejadilho, alugueres e equipamento para campismo e roadtrips. Transforma qualquer veículo numa base de aventura.",
+    images: [
+      {
+        url: "/images/terr4/brand-rooftop.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TERR4 Outdoor Gear",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
     title: "TERR4 Outdoor Gear",
     description:
-      "Rooftop tents e outdoor gear premium. Feito para quem quer ir mais longe.",
-    images: ["/images/terr4-logo-assets/terr4-logo-beige-transparent.png"],
+      "Tendas de tejadilho, alugueres e equipamento para campismo e roadtrips.",
+    images: ["/images/terr4/brand-rooftop.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://terr4.pt",
+  },
+  // ⬇️ Cola aqui o código do Google Search Console
+  verification: {
+    google: "COLA_AQUI_O_CODIGO_DO_GOOGLE",
   },
 };
 

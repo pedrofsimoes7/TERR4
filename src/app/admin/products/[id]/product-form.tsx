@@ -372,6 +372,7 @@ Inclui: Produto TERR4`;
               name="price"
               label="Preço (€)"
               type="number"
+              step="0.01"
               defaultValue={
                 product.priceCents ? String(product.priceCents / 100) : ""
               }
@@ -381,6 +382,7 @@ Inclui: Produto TERR4`;
               name="stock"
               label="Stock"
               type="number"
+              step="1"
               defaultValue={String(product.stock)}
             />
 
@@ -487,6 +489,7 @@ function Input({
   onChange,
   placeholder,
   type = "text",
+  step,
 }: {
   label: string;
   name: string;
@@ -495,6 +498,7 @@ function Input({
   onChange?: (value: string) => void;
   placeholder?: string;
   type?: string;
+  step?: string;
 }) {
   return (
     <div>
@@ -503,6 +507,7 @@ function Input({
       <input
         name={name}
         type={type}
+        step={step}
         defaultValue={defaultValue}
         value={value}
         onChange={(event) => onChange?.(event.target.value)}

@@ -179,3 +179,34 @@ model Rental {
   @@index([status])
   @@index([startDate, endDate])
 }
+
+
+enum ReviewStatus {
+  PENDING    // submetida pelo cliente, à espera de aprovação
+  APPROVED   // aprovada pelo admin, visível no site
+  REJECTED   // rejeitada
+}
+
+model Review {
+  id          String       @id @default(cuid())
+
+  customerName String
+  rating       Int          // 1 a 5 estrelas
+  title        String?
+  body         String
+
+  status       ReviewStatus @default(PENDING)
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model GalleryImage {
+  id        String   @id @default(cuid())
+
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
+
+  createdAt DateTime @default(now())
+}

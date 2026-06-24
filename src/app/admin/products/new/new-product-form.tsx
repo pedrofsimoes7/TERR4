@@ -170,7 +170,7 @@ export function NewProductForm({
           <Input name="category" label="Categoria" />
 
           <div className="grid gap-6 md:grid-cols-3">
-            <Input name="price" label="Preço (€)" type="price" step="0.01" />
+            <Input name="price" label="Preço (€)" type="number" step="0.01" placeholder="14.90" />
             <Input name="stock" label="Stock" type="number" step="1" />
             <div>
               <label className="text-sm font-bold text-white/70">Estado</label>

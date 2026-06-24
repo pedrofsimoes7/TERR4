@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { AdminRentalsCalendar } from "@/components/admin/admin-rentals-calendar";
 import { approveRentalAction, rejectRentalAction, cancelRentalAction } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("pt-PT", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
 }

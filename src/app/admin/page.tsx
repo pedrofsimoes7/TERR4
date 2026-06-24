@@ -1,15 +1,19 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { formatPrice } from "@/lib/utils";
 import { logoutAction } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboardPage() {
-  const [productCount, orderCount, customerCount, rentalCount, pendingRentals, products] =
+  const [productCount, orderCount, customerCount, rentalCount, pendingRentals, pendingReviews, products] =
     await Promise.all([
       prisma.product.count(),
       prisma.order.count(),
       prisma.customerUser.count(),
       prisma.rental.count(),
       prisma.rental.count({ where: { status: "PENDING" } }),
+      prisma.review.count({ where: { status: "PENDING" } }),
       prisma.product.findMany({
         include: { images: true },
         orderBy: { createdAt: "desc" },
@@ -42,11 +46,12 @@ export default async function AdminDashboardPage() {
           <Stat label="Alugueres" value={rentalCount.toString()} badge={pendingRentals > 0 ? `${pendingRentals} pendente${pendingRentals === 1 ? "" : "s"}` : undefined} />
         </div>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-4">
+        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <AdminLink href="/admin/products" title="Produtos" text="Gerir catálogo, preços e stock" />
           <AdminLink href="/admin/orders" title="Encomendas" text="Ver e aprovar pedidos" />
           <AdminLink href="/admin/rentals" title="Alugueres" text="Calendário e reservas" badge={pendingRentals > 0 ? pendingRentals : undefined} />
           <AdminLink href="/admin/customers" title="Clientes" text="Histórico e contactos" />
+          <AdminLink href="/admin/reviews" title="Galeria & Avaliações" text="Fotos e reviews de clientes" badge={pendingReviews > 0 ? pendingReviews : undefined} />
         </div>
 
         <div className="mt-12 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04]">
@@ -63,7 +68,7 @@ export default async function AdminDashboardPage() {
                 </div>
                 <div className="text-right">
                   <p className="font-bold">
-                    {product.priceCents ? `€${product.priceCents / 100}` : "Sem preço"}
+                    {product.priceCents ? formatPrice(product.priceCents / 100) : "Sem preço"}
                   </p>
                   <p className="mt-1 text-sm text-white/45">Stock: {product.stock}</p>
                 </div>
