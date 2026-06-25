@@ -10,6 +10,7 @@ import { MobileMenu } from "@/components/layout/mobile-menu";
 
 const nav = [
   { label: "Produtos", href: "/shop" },
+  { label: "Alugueres", href: "/alugueres" },
   { label: "Galeria", href: "/galeria" },
   { label: "Sobre", href: "/about" },
   { label: "FAQ", href: "/faq" },
@@ -36,16 +37,10 @@ export function Header() {
           ? "border-b border-white/10 bg-[#070706] md:bg-[#070706]/88 md:backdrop-blur-md"
           : "bg-[#070706] md:bg-transparent"
       }`}
+      // empurra o conteúdo do header para baixo do safe-area (notch),
+      // enquanto a faixa global (body::after) tapa a status bar.
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
-      {/* Faixa que cobre a status bar (notch / relógio) — garante que
-          NENHUM conteúdo do site passa por cima do header no iPhone.
-          Tem a mesma cor do header e a altura do safe-area. */}
-      <div
-        className={`w-full ${scrolled ? "" : "md:hidden"} `}
-        style={{ height: "env(safe-area-inset-top)" }}
-        aria-hidden
-      />
-
       <div className="mx-auto flex h-[5.5rem] max-w-7xl items-center justify-between px-6">
         <Link href="/" className="group flex items-center">
           <Image
