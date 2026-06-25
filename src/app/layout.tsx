@@ -14,11 +14,11 @@ const barlow = Barlow({
 export const metadata: Metadata = {
   metadataBase: new URL("https://terr4.pt"),
   title: {
-    default: "TERR4 Outdoor Gear — Tendas de tejadilho e equipamento de aventura",
+    default: "TERR4 Outdoor Gear. Tendas de tejadilho e equipamento de aventura",
     template: "%s | TERR4 Outdoor Gear",
   },
   description:
-    "TERR4 Outdoor Gear — tendas de tejadilho, alugueres e equipamento para campismo e roadtrips. Transforma qualquer veículo numa base de aventura. Envio para todo o Portugal.",
+    "TERR4 Outdoor Gear. Tendas de tejadilho, alugueres e equipamento para campismo e roadtrips. Transforma qualquer veículo numa base de aventura. Envio para todo o Portugal.",
   keywords: [
     // Marca
     "TERR4",
