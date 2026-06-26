@@ -1,17 +1,37 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { jwtVerify } from "jose";
 
-export function proxy(request: NextRequest) {
-  const adminSession = request.cookies.get("terr4-admin-session");
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
-  const isAdminLoginPage = request.nextUrl.pathname === "/admin/login";
+const SESSION_NAME = "terr4-admin-session";
 
-  if (isAdminRoute && !isAdminLoginPage && !adminSession) {
-    return NextResponse.redirect(new URL("/account/login", request.url));
+const secret = new TextEncoder().encode(
+  process.env.ADMIN_SESSION_SECRET || "dev-secret-change-this"
+);
+
+// No Next.js 16, o antigo "middleware" passou a chamar-se "proxy".
+// A função tem de se chamar `proxy` e o ficheiro `proxy.ts`.
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // A página de login é a única rota /admin aberta.
+  if (pathname === "/admin/login") {
+    return NextResponse.next();
   }
 
-  if (isAdminLoginPage && adminSession) {
-    return NextResponse.redirect(new URL("/admin", request.url));
+  // Protege todo o resto de /admin
+  if (pathname.startsWith("/admin")) {
+    const token = request.cookies.get(SESSION_NAME)?.value;
+
+    if (!token) {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
+
+    try {
+      await jwtVerify(token, secret);
+      return NextResponse.next();
+    } catch {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
   }
 
   return NextResponse.next();
