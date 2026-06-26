@@ -95,7 +95,7 @@ export const metadata: Metadata = {
     locale: "pt_PT",
     url: "https://terr4.pt",
     siteName: "TERR4 Outdoor Gear",
-    title: "TERR4 Outdoor Gear — Tendas de tejadilho e equipamento de aventura",
+    title: "TERR4 Outdoor Gear. Tendas de tejadilho e equipamento de aventura",
     description:
       "Tendas de tejadilho, alugueres e equipamento para campismo e roadtrips. Transforma qualquer veículo numa base de aventura.",
     images: [
