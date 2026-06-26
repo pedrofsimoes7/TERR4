@@ -4,6 +4,7 @@ import { ProductStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 function parseLines(value: string) {
   return value.split("\n").map((l) => l.trim()).filter(Boolean);
@@ -34,6 +35,8 @@ function parseFeatureLines(value: string) {
 }
 
 export async function createProductAction(formData: FormData) {
+  await requireAdmin();
+
   const name = String(formData.get("name") || "").trim();
   const slug = String(formData.get("slug") || "").trim();
   const category = String(formData.get("category") || "").trim();

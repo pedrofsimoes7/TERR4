@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/require-admin";
 import {
   sendRentalApprovedEmail,
   sendRentalRejectedEmail,
@@ -9,6 +10,7 @@ import {
 } from "@/lib/email";
 
 export async function approveRentalAction(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") || "");
   if (!id) return;
 
@@ -35,6 +37,7 @@ export async function approveRentalAction(formData: FormData) {
 }
 
 export async function rejectRentalAction(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") || "");
   if (!id) return;
 
@@ -61,6 +64,7 @@ export async function rejectRentalAction(formData: FormData) {
 }
 
 export async function cancelRentalAction(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") || "");
   if (!id) return;
 

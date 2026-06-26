@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ProductStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/require-admin";
 import { sendBackInStockEmail } from "@/lib/email";
 
 function parseLines(value: string) {
@@ -54,6 +55,8 @@ function parseImageUrls(formData: FormData) {
 }
 
 export async function updateProductAction(id: string, formData: FormData) {
+  await requireAdmin();
+
   const name = String(formData.get("name") || "").trim();
   const category = String(formData.get("category") || "").trim();
   const price = Number(formData.get("price") || 0);
@@ -112,7 +115,6 @@ export async function updateProductAction(id: string, formData: FormData) {
   }
 
   // ── Voltou a haver stock? Avisa quem reservou ──
-  // Dispara se o stock passou de 0 (ou menos) para um valor positivo.
   if (previousStock <= 0 && stock > 0) {
     try {
       const waiting = await prisma.stockReservation.findMany({

@@ -2,9 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 // ── Reviews ──
 export async function approveReviewAction(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") || "");
   if (!id) return;
   await prisma.review.update({ where: { id }, data: { status: "APPROVED" } });
@@ -13,6 +15,7 @@ export async function approveReviewAction(formData: FormData) {
 }
 
 export async function rejectReviewAction(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") || "");
   if (!id) return;
   await prisma.review.update({ where: { id }, data: { status: "REJECTED" } });
@@ -21,6 +24,7 @@ export async function rejectReviewAction(formData: FormData) {
 }
 
 export async function deleteReviewAction(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") || "");
   if (!id) return;
   await prisma.review.delete({ where: { id } });
@@ -30,6 +34,7 @@ export async function deleteReviewAction(formData: FormData) {
 
 // ── Galeria ──
 export async function addGalleryImageAction(formData: FormData) {
+  await requireAdmin();
   const url = String(formData.get("url") || "").trim();
   if (!url) return;
 
@@ -42,6 +47,7 @@ export async function addGalleryImageAction(formData: FormData) {
 }
 
 export async function deleteGalleryImageAction(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") || "");
   if (!id) return;
   await prisma.galleryImage.delete({ where: { id } });
