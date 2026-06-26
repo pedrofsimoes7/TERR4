@@ -140,7 +140,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt" className={`${barlow.variable} bg-[#070706]`}>
-      <body className="min-h-screen overflow-x-hidden bg-[#070706] font-sans text-[#c8c4be] antialiased">
+       <body className="min-h-[100dvh] overflow-x-hidden bg-[#070706] font-sans text-[#c8c4be] antialiased">
         {/* <CustomCursor /> */}
         <Header />
         {children}

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ProductStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { sendBackInStockEmail } from "@/lib/email";
 
 function parseLines(value: string) {
   return value
@@ -69,6 +70,13 @@ export async function updateProductAction(id: string, formData: FormData) {
   const compatibility = String(formData.get("compatibility") || "").trim();
   const imageUrls = parseImageUrls(formData);
 
+  // Lê o stock ANTERIOR antes de atualizar, para saber se passou de 0 para >0
+  const previous = await prisma.product.findUnique({
+    where: { id },
+    select: { stock: true },
+  });
+  const previousStock = previous?.stock ?? 0;
+
   const product = await prisma.product.update({
     where: { id },
     data: {
@@ -101,6 +109,38 @@ export async function updateProductAction(id: string, formData: FormData) {
         sortOrder: index,
       })),
     });
+  }
+
+  // ── Voltou a haver stock? Avisa quem reservou ──
+  // Dispara se o stock passou de 0 (ou menos) para um valor positivo.
+  if (previousStock <= 0 && stock > 0) {
+    try {
+      const waiting = await prisma.stockReservation.findMany({
+        where: { productId: id, status: "WAITING" },
+      });
+
+      for (const reservation of waiting) {
+        try {
+          await sendBackInStockEmail({
+            customerName: reservation.customerName,
+            customerEmail: reservation.customerEmail,
+            productName: product.name,
+            productSlug: product.slug,
+          });
+          await prisma.stockReservation.update({
+            where: { id: reservation.id },
+            data: { status: "NOTIFIED", notifiedAt: new Date() },
+          });
+        } catch (e) {
+          console.error(
+            `Erro a avisar ${reservation.customerEmail} sobre stock:`,
+            e
+          );
+        }
+      }
+    } catch (e) {
+      console.error("Erro ao processar avisos de stock:", e);
+    }
   }
 
   revalidatePath("/");

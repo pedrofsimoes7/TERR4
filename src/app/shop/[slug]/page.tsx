@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Check, Package, Ruler, Shield, Truck, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AddToCartButton } from "@/components/ui/add-to-cart-button";
+import { ReserveButton } from "@/components/ui/reserve-button";
 import { Reveal, StaggerReveal, StaggerItem } from "@/components/motion/reveal";
 import { formatPrice } from "@/lib/utils";
 import { getProductBySlug, getProducts } from "@/lib/products";
@@ -36,6 +37,7 @@ export default async function ProductPage({ params }: PageProps) {
   if (!product) notFound();
 
   const isRentable = product.slug === RENTAL_SLUG;
+  const isAvailable = product.status === "available";
 
   const trustItems =
     product.trustItems.length > 0
@@ -81,11 +83,20 @@ export default async function ProductPage({ params }: PageProps) {
                     <p className="text-4xl font-black text-white">
                       {product.price ? formatPrice(product.price) : "Preço em breve"}
                     </p>
+                    {!isAvailable && (
+                      <p className="mt-2 text-sm font-bold uppercase tracking-[0.14em] text-[#c46a2d]">
+                        Sem stock de momento
+                      </p>
+                    )}
                   </div>
 
-                  <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                    <AddToCartButton product={product} />
-                    <Button href="/contact" variant="secondary">Reservar</Button>
+                  {/* Botões: disponível → carrinho; sem stock → reserva */}
+                  <div className="mt-8">
+                    {isAvailable ? (
+                      <AddToCartButton product={product} />
+                    ) : (
+                      <ReserveButton product={product} />
+                    )}
                   </div>
 
                   {/* Link para aluguer (só TERR4 Start) */}
@@ -210,15 +221,20 @@ export default async function ProductPage({ params }: PageProps) {
         </Reveal>
       )}
 
-      {product.price && product.status === "available" && (
+      {/* Barra fixa mobile: carrinho se disponível, reserva se sem stock */}
+      {product.price && (
         <div className="fixed inset-x-0 bottom-0 z-[80] border-t border-white/10 bg-[#070706] px-4 pt-3 pb-[calc(20px+env(safe-area-inset-bottom))] md:hidden">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#a79d8d]">{product.name}</p>
               <p className="text-xl font-black text-white">{formatPrice(product.price)}</p>
             </div>
-            <div className="w-[180px]">
-              <AddToCartButton product={product} />
+            <div className="w-[200px]">
+              {isAvailable ? (
+                <AddToCartButton product={product} />
+              ) : (
+                <ReserveButton product={product} />
+              )}
             </div>
           </div>
         </div>

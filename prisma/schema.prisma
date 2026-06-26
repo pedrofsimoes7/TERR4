@@ -39,6 +39,7 @@ model Product {
   compatibility    String?
   rentals          Rental[]
 
+  reservations     StockReservation[] 
   images           ProductImage[]
   orderItems       OrderItem[]
 
@@ -209,4 +210,32 @@ model GalleryImage {
   sortOrder Int      @default(0)
 
   createdAt DateTime @default(now())
+}
+
+
+
+enum ReservationStatus {
+  WAITING    // à espera que haja stock
+  NOTIFIED   // já foi avisado que há stock
+  CANCELLED  // cancelada
+}
+
+model StockReservation {
+  id            String            @id @default(cuid())
+
+  productId     String
+  product       Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  customerName  String
+  customerEmail String
+
+  status        ReservationStatus @default(WAITING)
+  notifiedAt    DateTime?
+
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([productId])
+  @@index([status])
+  @@unique([productId, customerEmail])  // evita reservas duplicadas do mesmo email
 }

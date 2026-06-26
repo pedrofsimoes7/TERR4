@@ -42,13 +42,21 @@ type ProductWithImages = Awaited<
 };
 
 function mapProduct(product: ProductWithImages): StoreProduct {
+  // Regra automática: se não há stock, o produto fica "brevemente"
+  // (mesmo que na BD esteja AVAILABLE). Assim que o stock chega a zero,
+  // passa a mostrar o botão de reserva em vez do carrinho.
+  let status = mapStatus(product.status);
+  if (status === "available" && (product.stock ?? 0) <= 0) {
+    status = "coming-soon";
+  }
+
   return {
     slug: product.slug,
     name: product.name,
     category: product.category,
     price: product.priceCents ? product.priceCents / 100 : undefined,
     stock: product.stock,
-    status: mapStatus(product.status),
+    status,
     shortDescription: product.shortDescription,
     description: product.description,
     images: product.images.map((image) => image.url),

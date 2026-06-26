@@ -9,17 +9,6 @@ export function AddToCartButton({ product }: { product: StoreProduct }) {
   const addItem = useCartStore((state) => state.addItem);
   const [added, setAdded] = useState(false);
 
-  if (product.status !== "available") {
-    return (
-      <button
-        disabled
-        className="h-12 rounded-full bg-white/8 px-6 text-sm font-bold uppercase tracking-[0.1em] text-white/30"
-      >
-        Brevemente
-      </button>
-    );
-  }
-
   function handleAdd() {
     addItem(product);
     setAdded(true);
@@ -30,7 +19,7 @@ export function AddToCartButton({ product }: { product: StoreProduct }) {
     <button
       type="button"
       onClick={handleAdd}
-      className={`btn-wipe group flex h-12 items-center justify-center gap-2 rounded-full px-6 text-sm font-black uppercase tracking-[0.1em] transition-all duration-300 active:scale-[0.97] ${
+      className={`btn-wipe group flex h-12 w-full items-center justify-center gap-2 rounded-full px-6 text-sm font-black uppercase tracking-[0.1em] transition-all duration-300 active:scale-[0.97] ${
         added
           ? "bg-[#2d4a2d] text-green-100"
           : "bg-white text-neutral-950 hover:-translate-y-0.5 hover:bg-stone-100"

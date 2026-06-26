@@ -55,7 +55,7 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 1;
   opacity: 0.032;
   mix-blend-mode: overlay;
   background-image: radial-gradient(circle, rgba(255,255,255,.5) 0 1px, transparent 1px);
@@ -235,24 +235,3 @@ input:focus, textarea:focus, select:focus {
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
 }
 
-/* ════════════════════════════════════════════════════════════════════
-   FIX DEFINITIVO DA BARRA DE CIMA NO iPHONE
-   Adiciona isto ao teu globals.css (no fim, ou junto às regras de safe-area).
-
-   Como funciona: cria uma faixa FIXA no topo do ecrã, da cor da marca,
-   com a altura exata do safe-area (zona do relógio/notch). Fica sempre
-   por cima de tudo e tapa a status bar — o conteúdo do site nunca mais
-   aparece lá. Não depende do header, de scroll, nem de animações.
-   ════════════════════════════════════════════════════════════════════ */
-
-body::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: env(safe-area-inset-top);
-  background: #070706;
-  z-index: 60; /* acima do header (z-40) para tapar mesmo a status bar */
-  pointer-events: none;
-}
