@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { broadcastNewProduct } from "@/lib/marketing";
 
 function parseLines(value: string) {
   return value.split("\n").map((l) => l.trim()).filter(Boolean);
@@ -53,7 +54,6 @@ export async function createProductAction(formData: FormData) {
   const warranty = String(formData.get("warranty") || "").trim();
   const compatibility = String(formData.get("compatibility") || "").trim();
 
-  // ── Imagens do gestor de upload ──
   const imageCount = Number(formData.get("imageCount") || 0);
   const imageUrls: string[] = [];
   for (let i = 0; i < imageCount; i++) {
@@ -61,17 +61,18 @@ export async function createProductAction(formData: FormData) {
     if (url) imageUrls.push(url);
   }
 
-  // Fallback se não houver fotos
   if (imageUrls.length === 0) {
     imageUrls.push("/images/hero-jeep.jpeg");
   }
 
-  await prisma.product.create({
+  const priceCents = price > 0 ? Math.round(price * 100) : null;
+
+  const product = await prisma.product.create({
     data: {
       name,
       slug,
       category,
-      priceCents: price > 0 ? Math.round(price * 100) : null,
+      priceCents,
       stock,
       status,
       shortDescription,
@@ -91,6 +92,20 @@ export async function createProductAction(formData: FormData) {
       },
     },
   });
+
+  // ── Email "produto novo" — só se for criado como AVAILABLE ──
+  if (status === "AVAILABLE") {
+    try {
+      await broadcastNewProduct({
+        productName: product.name,
+        productSlug: product.slug,
+        priceCents: product.priceCents,
+        shortDescription: product.shortDescription,
+      });
+    } catch (e) {
+      console.error("Erro ao enviar email de produto novo:", e);
+    }
+  }
 
   revalidatePath("/");
   revalidatePath("/shop");

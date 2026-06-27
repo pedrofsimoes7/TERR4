@@ -9,10 +9,18 @@ import { motion, type Variants } from "framer-motion";
 import { createPaymentIntentAction } from "./actions";
 import { useCartStore } from "@/store/cart-store";
 import { formatPrice } from "@/lib/utils";
+import type { StoreProduct } from "@/lib/products";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""
 );
+
+// Preço efetivo do produto: promoção se ativa, senão normal.
+// Bate certo com o cálculo do servidor (checkout/actions.ts).
+function effectivePrice(product: StoreProduct): number {
+  if (product.onSale && product.salePrice) return product.salePrice;
+  return product.price || 0;
+}
 
 const sectionVariants: Variants = {
   hidden: { opacity: 0, y: 24 },
@@ -36,7 +44,10 @@ export default function CheckoutPage() {
   const [creatingPayment, setCreatingPayment] = useState(false);
 
   const total = useMemo(() => {
-    return items.reduce((acc, item) => acc + (item.product.price || 0) * item.quantity, 0);
+    return items.reduce(
+      (acc, item) => acc + effectivePrice(item.product) * item.quantity,
+      0
+    );
   }, [items]);
 
   useEffect(() => {
@@ -56,7 +67,7 @@ export default function CheckoutPage() {
   if (items.length === 0 && !clientSecret) return null;
 
   return (
-    <main className="min-h-screen bg-[#070706] px-6 pb-28 pt-40 text-white">
+    <main className="min-h-[100dvh] bg-[#070706] px-6 pb-28 pt-40 text-white">
       <section className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -174,28 +185,39 @@ export default function CheckoutPage() {
             </p>
 
             <div className="mt-6 space-y-4">
-              {items.map((item) => (
-                <div key={item.product.slug} className="flex gap-4 rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-3">
-                  <div className="overflow-hidden rounded-2xl">
-                    <Image
-                      src={item.product.images[0]}
-                      alt={item.product.name}
-                      width={80}
-                      height={64}
-                      className="aspect-[4/3] object-cover"
-                    />
-                  </div>
-                  <div className="flex flex-1 flex-col justify-between">
-                    <p className="text-sm font-black text-white">{item.product.name}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-white/45">×{item.quantity}</span>
-                      <span className="text-sm font-black">
-                        {formatPrice((item.product.price || 0) * item.quantity)}
-                      </span>
+              {items.map((item) => {
+                const unit = effectivePrice(item.product);
+                const onSale = item.product.onSale && item.product.salePrice;
+                return (
+                  <div key={item.product.slug} className="flex gap-4 rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-3">
+                    <div className="overflow-hidden rounded-2xl">
+                      <Image
+                        src={item.product.images[0]}
+                        alt={item.product.name}
+                        width={80}
+                        height={64}
+                        className="aspect-[4/3] object-cover"
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col justify-between">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-black text-white">{item.product.name}</p>
+                        {onSale && (
+                          <span className="rounded-full bg-[#c46a2d] px-2 py-0.5 text-[10px] font-black text-white">
+                            -{item.product.discountPercent}%
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-white/45">×{item.quantity}</span>
+                        <span className="text-sm font-black">
+                          {formatPrice(unit * item.quantity)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="mt-6 border-t border-white/10 pt-5">

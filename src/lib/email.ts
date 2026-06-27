@@ -629,3 +629,99 @@ export async function sendContactEmail({
   return result.data?.id;
 }
  
+
+// ════════════════════════════════════════════════════════════════════
+// CLIENTE (marketing) — produto em promoção
+// ════════════════════════════════════════════════════════════════════
+export async function sendPromotionEmail({
+  customerName,
+  customerEmail,
+  productName,
+  productSlug,
+  oldPrice,
+  newPrice,
+  discountPercent,
+  saleEndsAt,
+}: {
+  customerName: string;
+  customerEmail: string;
+  productName: string;
+  productSlug: string;
+  oldPrice: number; // em cêntimos
+  newPrice: number; // em cêntimos
+  discountPercent: number;
+  saleEndsAt?: Date | null;
+}) {
+  const rows = [
+    { label: "Produto", value: productName },
+    { label: "Preço normal", value: formatEuros(oldPrice) },
+    { label: "Preço em promoção", value: formatEuros(newPrice) },
+    { label: "Poupas", value: `${discountPercent}%` },
+  ];
+  if (saleEndsAt) {
+    rows.push({ label: "Até", value: formatDatePT(saleEndsAt) });
+  }
+ 
+  const html = baseEmail({
+    preheader: `${productName} está com ${discountPercent}% de desconto.`,
+    heading: `${discountPercent}% de desconto na ${productName}`,
+    bodyHtml: `
+      <p style="margin:0 0 16px;">Olá ${customerName || "aventureiro"},</p>
+      <p style="margin:0 0 4px;">Temos uma novidade para ti: a <strong style="color:${COLORS.heading};">${productName}</strong> está em promoção. É a altura certa para garantir a tua.</p>
+      ${detailBox(rows)}
+      ${button("Aproveitar promoção", `${APP_URL}/shop/${productSlug}`)}
+      <p style="margin:16px 0 0;font-size:13px;color:${COLORS.textSoft};">Recebeste este email porque autorizaste novidades e promoções da TERR4.</p>
+    `,
+  });
+ 
+  const result = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to: customerEmail,
+    replyTo: ADMIN_EMAIL,
+    subject: `${discountPercent}% de desconto na ${productName}`,
+    html,
+  });
+  return result.data?.id;
+}
+ 
+// ════════════════════════════════════════════════════════════════════
+// CLIENTE (marketing) — produto novo lançado
+// ════════════════════════════════════════════════════════════════════
+export async function sendNewProductEmail({
+  customerName,
+  customerEmail,
+  productName,
+  productSlug,
+  price,
+  shortDescription,
+}: {
+  customerName: string;
+  customerEmail: string;
+  productName: string;
+  productSlug: string;
+  price?: number | null; // em cêntimos
+  shortDescription?: string;
+}) {
+  const html = baseEmail({
+    preheader: `Novidade na TERR4: ${productName}.`,
+    heading: `Novidade: ${productName}`,
+    bodyHtml: `
+      <p style="margin:0 0 16px;">Olá ${customerName || "aventureiro"},</p>
+      <p style="margin:0 0 4px;">Acabámos de lançar um novo produto e queremos que sejas dos primeiros a conhecer: a <strong style="color:${COLORS.heading};">${productName}</strong>.</p>
+      ${shortDescription ? `<p style="margin:14px 0 0;color:${COLORS.textSoft};">${shortDescription}</p>` : ""}
+      ${price ? detailBox([{ label: "Preço", value: formatEuros(price) }]) : ""}
+      ${button("Ver produto", `${APP_URL}/shop/${productSlug}`)}
+      <p style="margin:16px 0 0;font-size:13px;color:${COLORS.textSoft};">Recebeste este email porque autorizaste novidades e promoções da TERR4.</p>
+    `,
+  });
+ 
+  const result = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to: customerEmail,
+    replyTo: ADMIN_EMAIL,
+    subject: `Novidade na TERR4: ${productName}`,
+    html,
+  });
+  return result.data?.id;
+}
+ 

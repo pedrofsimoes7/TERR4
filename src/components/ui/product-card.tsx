@@ -25,6 +25,13 @@ export function ProductCard({ product }: { product: StoreProduct }) {
           {product.status === "available" ? "Disponível" : "Brevemente"}
         </span>
 
+        {/* Badge de desconto */}
+        {product.onSale && product.discountPercent && (
+          <span className="absolute right-5 top-5 rounded-full bg-[#c46a2d] px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-white shadow-lg">
+            -{product.discountPercent}%
+          </span>
+        )}
+
         <div className="absolute inset-0 flex items-center justify-center bg-black/45 opacity-0 backdrop-blur-[2px] transition duration-500 group-hover:opacity-100">
           <span className="rounded-full bg-white px-6 py-3 text-sm font-black uppercase tracking-[0.14em] text-neutral-950">
             Ver produto →
@@ -44,9 +51,23 @@ export function ProductCard({ product }: { product: StoreProduct }) {
             </h2>
           </div>
 
-          <p className="shrink-0 text-2xl font-black text-white">
-            {product.price ? formatPrice(product.price) : "—"}
-          </p>
+          {/* Preço: com promo mostra riscado + novo; sem promo mostra normal */}
+          <div className="shrink-0 text-right">
+            {product.onSale && product.salePrice ? (
+              <>
+                <p className="text-2xl font-black text-[#c46a2d]">
+                  {formatPrice(product.salePrice)}
+                </p>
+                <p className="text-sm font-bold text-white/35 line-through">
+                  {product.price ? formatPrice(product.price) : ""}
+                </p>
+              </>
+            ) : (
+              <p className="text-2xl font-black text-white">
+                {product.price ? formatPrice(product.price) : "—"}
+              </p>
+            )}
+          </div>
         </div>
 
         <p className="mt-6 max-w-xl text-base leading-7 text-[#c8c4be]/65">

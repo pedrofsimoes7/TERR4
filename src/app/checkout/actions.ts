@@ -9,6 +9,25 @@ type CheckoutItem = {
   quantity: number;
 };
 
+// Calcula o preço unitário a cobrar: se o produto tem promoção ativa
+// (salePriceCents válido e data não passou), usa o preço promocional.
+// Senão, usa o preço normal. Feito no SERVIDOR = seguro.
+function getUnitCents(product: {
+  priceCents: number | null;
+  salePriceCents: number | null;
+  saleEndsAt: Date | null;
+}): number | null {
+  if (!product.priceCents) return null;
+
+  const now = new Date();
+  const promoActive =
+    product.salePriceCents &&
+    product.salePriceCents < product.priceCents &&
+    (!product.saleEndsAt || product.saleEndsAt > now);
+
+  return promoActive ? product.salePriceCents! : product.priceCents;
+}
+
 export async function createPaymentIntentAction(formData: FormData) {
   const firstName = String(formData.get("firstName") || "");
   const lastName = String(formData.get("lastName") || "");
@@ -39,14 +58,19 @@ export async function createPaymentIntentAction(formData: FormData) {
     .map((item) => {
       const product = products.find((p) => p.slug === item.slug);
 
-      if (!product || !product.priceCents) return null;
+      if (!product) return null;
+
+      // Preço com promoção aplicada (servidor)
+      const unitCents = getUnitCents(product);
+      if (!unitCents) return null;
+
       if (product.stock < item.quantity) return null;
 
       return {
         productId: product.id,
         name: product.name,
         quantity: item.quantity,
-        unitCents: product.priceCents,
+        unitCents,
       };
     })
     .filter(Boolean) as {

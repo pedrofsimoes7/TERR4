@@ -6,7 +6,8 @@ import { logoutAction } from "./actions";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  const [productCount, orderCount, customerCount, rentalCount, pendingRentals, pendingReviews, products] =
+  const now = new Date();
+  const [productCount, orderCount, customerCount, rentalCount, pendingRentals, pendingReviews, activePromoCount, products] =
     await Promise.all([
       prisma.product.count(),
       prisma.order.count(),
@@ -14,6 +15,12 @@ export default async function AdminDashboardPage() {
       prisma.rental.count(),
       prisma.rental.count({ where: { status: "PENDING" } }),
       prisma.review.count({ where: { status: "PENDING" } }),
+      prisma.product.count({
+        where: {
+          salePriceCents: { not: null },
+          OR: [{ saleEndsAt: null }, { saleEndsAt: { gt: now } }],
+        },
+      }),
       prisma.product.findMany({
         include: { images: true },
         orderBy: { createdAt: "desc" },
@@ -21,7 +28,7 @@ export default async function AdminDashboardPage() {
     ]);
 
   return (
-    <main className="min-h-screen bg-neutral-950 px-6 pb-24 pt-32 text-white">
+    <main className="min-h-[100dvh] bg-neutral-950 px-6 pb-24 pt-32 text-white">
       <section className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
@@ -48,6 +55,7 @@ export default async function AdminDashboardPage() {
 
         <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <AdminLink href="/admin/products" title="Produtos" text="Gerir catálogo, preços e stock" />
+          <AdminLink href="/admin/promotions" title="Promoções & Campanhas" text="Criar descontos e avisar clientes" badge={activePromoCount > 0 ? activePromoCount : undefined} />
           <AdminLink href="/admin/orders" title="Encomendas" text="Ver e aprovar pedidos" />
           <AdminLink href="/admin/rentals" title="Alugueres" text="Calendário e reservas" badge={pendingRentals > 0 ? pendingRentals : undefined} />
           <AdminLink href="/admin/customers" title="Clientes" text="Histórico e contactos" />
@@ -97,14 +105,18 @@ function Stat({ label, value, badge }: { label: string; value: string; badge?: s
   );
 }
 
-function AdminLink({ href, title, text, badge }: { href: string; title: string; text: string; badge?: number }) {
+function AdminLink({ href, title, text, badge, accent }: { href: string; title: string; text: string; badge?: number; accent?: boolean }) {
   return (
     <Link
       href={href}
-      className="relative rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5 transition hover:bg-white/[0.08]"
+      className={`relative rounded-[1.5rem] border p-5 transition ${
+        accent
+          ? "border-[#c46a2d]/30 bg-[#c46a2d]/[0.06] hover:bg-[#c46a2d]/[0.12]"
+          : "border-white/10 bg-white/[0.04] hover:bg-white/[0.08]"
+      }`}
     >
       {badge !== undefined && badge > 0 && (
-        <span className="absolute right-4 top-4 flex size-6 items-center justify-center rounded-full bg-amber-500 text-[11px] font-black text-neutral-950">
+        <span className="absolute right-4 top-4 flex size-6 items-center justify-center rounded-full bg-[#c46a2d] text-[11px] font-black text-white">
           {badge}
         </span>
       )}

@@ -11,7 +11,7 @@ export default function CustomerRegisterPage() {
   );
 
   return (
-    <main className="flex min-h-[100dvh] items-center justify-center bg-neutral-950 px-6 text-white">
+    <main className="flex min-h-[100dvh] items-center justify-center bg-neutral-950 px-6 py-32 text-white">
       <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
         <p className="text-xs font-bold uppercase tracking-[0.35em] text-stone-400">
           Conta
@@ -53,6 +53,21 @@ export default function CustomerRegisterPage() {
               Mínimo 8 caracteres, com pelo menos uma letra e um número.
             </p>
           </div>
+
+          {/* Consentimento de marketing */}
+          <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 transition hover:bg-white/[0.05]">
+            <input
+              type="checkbox"
+              name="marketingConsent"
+              className="mt-0.5 size-4 shrink-0 accent-[#c46a2d]"
+            />
+            <span className="text-sm leading-6 text-white/65">
+              Quero receber novidades, campanhas e promoções da TERR4 por email.
+              <span className="mt-1 block text-xs text-white/35">
+                Podes cancelar a qualquer momento. Sem spam.
+              </span>
+            </span>
+          </label>
 
           {state?.error && (
             <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-3">

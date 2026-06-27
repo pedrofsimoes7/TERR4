@@ -27,6 +27,8 @@ model Product {
   name             String
   category         String
   priceCents       Int?
+  salePriceCents   Int?        // ← preço promocional (null = sem promo)
+  saleEndsAt       DateTime?
   stock            Int           @default(0)
   status           ProductStatus @default(DRAFT)
   shortDescription String
@@ -81,6 +83,8 @@ model CustomerUser {
   passwordHash               String
 
   emailVerifiedAt            DateTime?
+
+  marketingConsent           Boolean   @default(false)
 
   emailVerificationToken     String?  @unique
 

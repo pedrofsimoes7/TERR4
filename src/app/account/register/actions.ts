@@ -10,7 +10,6 @@ export type RegisterState = {
   error?: string;
 } | null;
 
-// Valida a password. Devolve mensagem de erro, ou null se estiver ok.
 function validatePassword(password: string): string | null {
   if (password.length < 8) {
     return "A password deve ter pelo menos 8 caracteres.";
@@ -36,6 +35,9 @@ export async function customerRegisterAction(
 
   const password = String(formData.get("password") || "");
 
+  // checkbox: vem "on" se marcado, null se não
+  const marketingConsent = formData.get("marketingConsent") === "on";
+
   if (!email) {
     return { error: "Indica um email válido." };
   }
@@ -43,7 +45,6 @@ export async function customerRegisterAction(
     return { error: "O email não parece válido." };
   }
 
-  // Requisitos da password
   const passwordError = validatePassword(password);
   if (passwordError) {
     return { error: passwordError };
@@ -65,6 +66,7 @@ export async function customerRegisterAction(
       name,
       email,
       passwordHash,
+      marketingConsent,
       emailVerificationToken: token,
       emailVerificationExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
     },

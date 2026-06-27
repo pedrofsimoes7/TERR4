@@ -80,15 +80,32 @@ export default async function ProductPage({ params }: PageProps) {
                   </p>
 
                   <div className="mt-8">
-                    <p className="text-4xl font-black text-white">
-                      {product.price ? formatPrice(product.price) : "Preço em breve"}
-                    </p>
+                    {product.onSale && product.salePrice ? (
+                      <div>
+                        <div className="flex items-baseline gap-3">
+                          <p className="text-4xl font-black text-[#c46a2d]">
+                            {formatPrice(product.salePrice)}
+                          </p>
+                          <p className="text-2xl font-bold text-white/35 line-through">
+                            {product.price ? formatPrice(product.price) : ""}
+                          </p>
+                        </div>
+                        <span className="mt-2 inline-block rounded-full bg-[#c46a2d] px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-white">
+                          Poupa {product.discountPercent}%
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="text-4xl font-black text-white">
+                        {product.price ? formatPrice(product.price) : "Preço em breve"}
+                      </p>
+                    )}
                     {!isAvailable && (
                       <p className="mt-2 text-sm font-bold uppercase tracking-[0.14em] text-[#c46a2d]">
                         Sem stock de momento
                       </p>
                     )}
                   </div>
+ 
 
                   {/* Botões: disponível → carrinho; sem stock → reserva */}
                   <div className="mt-8">

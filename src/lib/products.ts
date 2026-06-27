@@ -7,6 +7,10 @@ export type StoreProduct = {
   name: string;
   category: string;
   price?: number;
+  salePrice?: number;        // preço promocional (se houver promo ativa)
+  saleEndsAt?: Date;         // quando acaba a promo
+  discountPercent?: number;  // % de desconto (calculada)
+  onSale: boolean;           // true se há promo ativa agora
   stock?: number;
   status: "available" | "coming-soon" | "draft";
   shortDescription: string;
@@ -42,19 +46,45 @@ type ProductWithImages = Awaited<
 };
 
 function mapProduct(product: ProductWithImages): StoreProduct {
-  // Regra automática: se não há stock, o produto fica "brevemente"
-  // (mesmo que na BD esteja AVAILABLE). Assim que o stock chega a zero,
-  // passa a mostrar o botão de reserva em vez do carrinho.
+  // Regra automática: sem stock => "brevemente"
   let status = mapStatus(product.status);
   if (status === "available" && (product.stock ?? 0) <= 0) {
     status = "coming-soon";
+  }
+
+  const price = product.priceCents ? product.priceCents / 100 : undefined;
+
+  // ── Promoção ativa? ──
+  // Há promo se existe salePriceCents E a data de fim ainda não passou.
+  let salePrice: number | undefined;
+  let saleEndsAt: Date | undefined;
+  let discountPercent: number | undefined;
+  let onSale = false;
+
+  const now = new Date();
+  if (
+    product.salePriceCents &&
+    product.priceCents &&
+    product.salePriceCents < product.priceCents &&
+    (!product.saleEndsAt || product.saleEndsAt > now)
+  ) {
+    onSale = true;
+    salePrice = product.salePriceCents / 100;
+    saleEndsAt = product.saleEndsAt ?? undefined;
+    discountPercent = Math.round(
+      ((product.priceCents - product.salePriceCents) / product.priceCents) * 100
+    );
   }
 
   return {
     slug: product.slug,
     name: product.name,
     category: product.category,
-    price: product.priceCents ? product.priceCents / 100 : undefined,
+    price,
+    salePrice,
+    saleEndsAt,
+    discountPercent,
+    onSale,
     stock: product.stock,
     status,
     shortDescription: product.shortDescription,
