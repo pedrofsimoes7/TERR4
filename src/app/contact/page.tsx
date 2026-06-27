@@ -1,13 +1,63 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUpRight, MapPin, Mail, Clock } from "lucide-react";
+import { ArrowUpRight, MapPin, Mail, Clock, Loader2 } from "lucide-react";
 
 export default function ContactPage() {
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [vehicle, setVehicle] = useState("");
+  const [message, setMessage] = useState("");
+
+  async function handleSubmit() {
+    setError("");
+
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      setError("Preenche o nome, email e mensagem.");
+      return;
+    }
+    if (!email.includes("@")) {
+      setError("O email não parece válido.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: name.trim(),
+          customerEmail: email.trim(),
+          vehicle: vehicle.trim(),
+          message: message.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Não foi possível enviar a mensagem.");
+      }
+
+      setSent(true);
+      // limpa os campos
+      setName("");
+      setEmail("");
+      setVehicle("");
+      setMessage("");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erro inesperado.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <main className="min-h-screen bg-[#070706] px-6 pb-28 pt-40 text-white">
+    <main className="min-h-[100dvh] bg-[#070706] px-6 pb-28 pt-40 text-white">
       <section className="mx-auto max-w-7xl">
 
         {/* Header */}
@@ -46,18 +96,44 @@ export default function ContactPage() {
             ) : (
               <div className="grid gap-5">
                 <div className="grid gap-5 sm:grid-cols-2">
-                  <ContactInput placeholder="Nome" />
-                  <ContactInput placeholder="Email" type="email" />
+                  <ContactInput placeholder="Nome" value={name} onChange={setName} />
+                  <ContactInput placeholder="Email" type="email" value={email} onChange={setEmail} />
                 </div>
-                <ContactInput placeholder="Veículo (ex: Toyota Land Cruiser)" />
-                <ContactTextarea placeholder="Como podemos ajudar?" rows={5} />
+                <ContactInput
+                  placeholder="Veículo (ex: Toyota Land Cruiser) — opcional"
+                  value={vehicle}
+                  onChange={setVehicle}
+                />
+                <ContactTextarea
+                  placeholder="Como podemos ajudar?"
+                  rows={5}
+                  value={message}
+                  onChange={setMessage}
+                />
+
+                {error && (
+                  <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-3">
+                    <p className="text-sm text-red-300">{error}</p>
+                  </div>
+                )}
+
                 <button
                   type="button"
-                  onClick={() => setSent(true)}
-                  className="btn-wipe group mt-2 flex h-13 items-center justify-center gap-3 rounded-full bg-[#f4efe4] px-8 font-black uppercase tracking-[0.1em] text-neutral-950 transition duration-300 hover:-translate-y-0.5 hover:bg-white active:scale-[0.97]"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="btn-wipe group mt-2 flex h-13 items-center justify-center gap-3 rounded-full bg-[#f4efe4] px-8 font-black uppercase tracking-[0.1em] text-neutral-950 transition duration-300 hover:-translate-y-0.5 hover:bg-white active:scale-[0.97] disabled:opacity-60"
                 >
-                  Enviar mensagem
-                  <ArrowUpRight size={16} className="transition duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  {loading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      A enviar...
+                    </>
+                  ) : (
+                    <>
+                      Enviar mensagem
+                      <ArrowUpRight size={16} className="transition duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    </>
+                  )}
                 </button>
               </div>
             )}
@@ -98,21 +174,45 @@ export default function ContactPage() {
   );
 }
 
-function ContactInput({ placeholder, type = "text" }: { placeholder: string; type?: string }) {
+function ContactInput({
+  placeholder,
+  type = "text",
+  value,
+  onChange,
+}: {
+  placeholder: string;
+  type?: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
   return (
     <input
       placeholder={placeholder}
       type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
       className="h-13 w-full rounded-full border border-white/10 bg-white/[0.04] px-5 text-white outline-none placeholder:text-white/30 transition-colors duration-200 focus:border-[#c46a2d]/60 focus:bg-white/[0.06]"
     />
   );
 }
 
-function ContactTextarea({ placeholder, rows }: { placeholder: string; rows: number }) {
+function ContactTextarea({
+  placeholder,
+  rows,
+  value,
+  onChange,
+}: {
+  placeholder: string;
+  rows: number;
+  value: string;
+  onChange: (v: string) => void;
+}) {
   return (
     <textarea
       placeholder={placeholder}
       rows={rows}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
       className="w-full rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5 text-white outline-none placeholder:text-white/30 transition-colors duration-200 focus:border-[#c46a2d]/60 focus:bg-white/[0.06] resize-none"
     />
   );

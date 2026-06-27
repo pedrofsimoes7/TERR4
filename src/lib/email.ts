@@ -586,3 +586,46 @@ export async function sendAdminLowStockEmail({
   });
   return result.data?.id;
 }
+
+
+// ════════════════════════════════════════════════════════════════════
+// INTERNO — nova mensagem de contacto (-> terr4geral)
+// ════════════════════════════════════════════════════════════════════
+export async function sendContactEmail({
+  customerName,
+  customerEmail,
+  vehicle,
+  message,
+}: {
+  customerName: string;
+  customerEmail: string;
+  vehicle?: string;
+  message: string;
+}) {
+  const rows = [
+    { label: "Nome", value: customerName },
+    { label: "Email", value: customerEmail },
+  ];
+  if (vehicle) rows.push({ label: "Veículo", value: vehicle });
+ 
+  const html = baseEmail({
+    preheader: `Nova mensagem de ${customerName}.`,
+    heading: "Nova mensagem de contacto",
+    bodyHtml: `
+      <p style="margin:0 0 4px;">Recebeste uma nova mensagem através do formulário de contacto do site.</p>
+      ${detailBox(rows)}
+      <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:${COLORS.textSoft};">Mensagem:</p>
+      <p style="margin:0;padding:16px 18px;background-color:${COLORS.bg};border-radius:12px;white-space:pre-wrap;">${message}</p>
+    `,
+  });
+ 
+  const result = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to: ADMIN_EMAIL,
+    replyTo: customerEmail,
+    subject: `Nova mensagem de contacto: ${customerName}`,
+    html,
+  });
+  return result.data?.id;
+}
+ 
