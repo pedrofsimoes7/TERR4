@@ -48,7 +48,7 @@ export default async function Home() {
               <StaggerReveal className="grid grid-cols-3 gap-3 md:w-auto">
                 <StaggerItem><StatCard icon={<Timer size={16} />} label="Montagem" value="60s" /></StaggerItem>
                 <StaggerItem><StatCard icon={<Weight size={16} />} label="Peso" value="56kg" /></StaggerItem>
-                <StaggerItem><StatCard icon={<Shield size={16} />} label="Garantia" value="3 anos" /></StaggerItem>
+                <StaggerItem><StatCard icon={<Shield size={16} />} label="Garantia" value="12 meses" /></StaggerItem>
               </StaggerReveal>
             </div>
 
@@ -132,7 +132,7 @@ export default async function Home() {
             <div className="grid divide-x divide-white/8 sm:grid-cols-3">
               <NumberCell number="60" unit="seg." label="Montagem" sub="do fecho à cama" />
               <NumberCell number="2500" unit="mm" label="Impermeabilidade" sub="para qualquer chuva" />
-              <NumberCell number="3" unit="anos" label="Garantia" sub="contra defeitos de fabrico" />
+              <NumberCell number="12" unit="meses" label="Garantia" sub="contra defeitos de fabrico" />
             </div>
           </div>
         </section>
