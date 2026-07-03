@@ -35,8 +35,8 @@ export async function customerRegisterAction(
 
   const password = String(formData.get("password") || "");
 
-  // checkbox: vem "on" se marcado, null se não
   const marketingConsent = formData.get("marketingConsent") === "on";
+  const acceptTerms = formData.get("acceptTerms") === "on";
 
   if (!email) {
     return { error: "Indica um email válido." };
@@ -48,6 +48,11 @@ export async function customerRegisterAction(
   const passwordError = validatePassword(password);
   if (passwordError) {
     return { error: passwordError };
+  }
+
+  // Termos obrigatórios
+  if (!acceptTerms) {
+    return { error: "Tens de aceitar os termos e condições para criar conta." };
   }
 
   const existingCustomer = await prisma.customerUser.findUnique({
@@ -67,6 +72,7 @@ export async function customerRegisterAction(
       email,
       passwordHash,
       marketingConsent,
+      termsAcceptedAt: new Date(), // regista quando aceitou
       emailVerificationToken: token,
       emailVerificationExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
     },

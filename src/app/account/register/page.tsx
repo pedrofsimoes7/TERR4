@@ -54,7 +54,28 @@ export default function CustomerRegisterPage() {
             </p>
           </div>
 
-          {/* Consentimento de marketing */}
+          {/* Termos e condições — OBRIGATÓRIO */}
+          <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 transition hover:bg-white/[0.05]">
+            <input
+              type="checkbox"
+              name="acceptTerms"
+              required
+              className="mt-0.5 size-4 shrink-0 accent-[#c46a2d]"
+            />
+            <span className="text-sm leading-6 text-white/65">
+              Li e aceito os{" "}
+              <Link
+                href="/terms"
+                target="_blank"
+                className="font-bold text-white underline underline-offset-2"
+              >
+                termos e condições
+              </Link>
+              .
+            </span>
+          </label>
+
+          {/* Marketing — OPCIONAL */}
           <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 transition hover:bg-white/[0.05]">
             <input
               type="checkbox"

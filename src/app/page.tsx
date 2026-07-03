@@ -45,7 +45,7 @@ export default async function Home() {
               </div>
 
               {/* Stats */}
-              <StaggerReveal className="grid grid-cols-3 gap-3 md:w-auto">
+              <StaggerReveal className="grid grid-cols-3 items-stretch gap-3 md:w-auto">
                 <StaggerItem><StatCard icon={<Timer size={16} />} label="Montagem" value="60s" /></StaggerItem>
                 <StaggerItem><StatCard icon={<Weight size={16} />} label="Peso" value="56kg" /></StaggerItem>
                 <StaggerItem><StatCard icon={<Shield size={16} />} label="Garantia" value="12 meses" /></StaggerItem>
@@ -205,10 +205,10 @@ export default async function Home() {
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="stat-shimmer rounded-2xl border border-white/8 bg-white/[0.04] p-4 transition-all duration-300 hover:border-[#c46a2d]/25 hover:bg-white/[0.07]">
+    <div className="stat-shimmer flex h-full flex-col rounded-2xl border border-white/8 bg-white/[0.04] p-4 transition-all duration-300 hover:border-[#c46a2d]/25 hover:bg-white/[0.07]">
       <div className="text-[#a79d8d]">{icon}</div>
       <p className="mt-3 text-[9px] font-black uppercase tracking-[0.22em] text-white/30">{label}</p>
-      <p className="mt-1 text-xl font-black text-white">{value}</p>
+      <p className="mt-1 whitespace-nowrap text-xl font-black text-white">{value}</p>
     </div>
   );
 }

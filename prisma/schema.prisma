@@ -86,6 +86,8 @@ model CustomerUser {
 
   marketingConsent           Boolean   @default(false)
 
+  termsAcceptedAt    DateTime?
+
   emailVerificationToken     String?  @unique
 
   emailVerificationExpiresAt DateTime?
