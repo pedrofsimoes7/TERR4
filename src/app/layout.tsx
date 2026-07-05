@@ -13,6 +13,14 @@ const barlow = Barlow({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://terr4.pt"),
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
   title: {
     default: "TERR4 Outdoor Gear. Tendas de tejadilho e equipamento de aventura",
     template: "%s | TERR4 Outdoor Gear",
