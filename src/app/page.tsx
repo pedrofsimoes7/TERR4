@@ -16,12 +16,14 @@ export default async function Home() {
       <Hero />
 
       {/* ── Ticker ── */}
-      <div className="ticker-skew overflow-hidden border-y border-white/8 bg-white">
-        <div className="flex whitespace-nowrap py-4 text-[2.2rem] font-black uppercase tracking-[-0.03em] text-neutral-950 md:text-5xl">
-          <span className="animate-[marquee_16s_linear_infinite] flex shrink-0 items-center">
-            Rooftop Tents&nbsp;&nbsp;<span className="text-[#c46a2d]">✦</span>&nbsp;&nbsp;Outdoor Gear&nbsp;&nbsp;<span className="text-[#c46a2d]">✦</span>&nbsp;&nbsp;Built for the Road&nbsp;&nbsp;<span className="text-[#c46a2d]">✦</span>&nbsp;&nbsp;Portugal&nbsp;&nbsp;<span className="text-[#c46a2d]">✦</span>&nbsp;&nbsp;
-            Rooftop Tents&nbsp;&nbsp;<span className="text-[#c46a2d]">✦</span>&nbsp;&nbsp;Outdoor Gear&nbsp;&nbsp;<span className="text-[#c46a2d]">✦</span>&nbsp;&nbsp;Built for the Road&nbsp;&nbsp;<span className="text-[#c46a2d]">✦</span>&nbsp;&nbsp;Portugal&nbsp;&nbsp;<span className="text-[#c46a2d]">✦</span>&nbsp;&nbsp;
-          </span>
+      <div className="relative flex overflow-hidden border-y border-[#c46a2d]/20 bg-[#0e0c0a] py-5">
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#0e0c0a] to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#0e0c0a] to-transparent" />
+        <div className="flex shrink-0 animate-[marquee_30s_linear_infinite] items-center whitespace-nowrap text-xl font-black uppercase tracking-[0.06em] text-[#f4efe4]/80 md:text-3xl">
+          <TickerContent />
+        </div>
+        <div className="flex shrink-0 animate-[marquee_30s_linear_infinite] items-center whitespace-nowrap text-xl font-black uppercase tracking-[0.06em] text-[#f4efe4]/80 md:text-3xl" aria-hidden="true">
+          <TickerContent />
         </div>
       </div>
 
@@ -109,8 +111,8 @@ export default async function Home() {
               </p>
 
               <StaggerReveal className="mt-8 grid gap-2.5 sm:grid-cols-2" initialDelay={0.1}>
-                {["Impermeabilidade 2500mm", "Canvas Rip-Stop 280g", "Montagem em 60 segundos", "Compatível com a maioria dos veículos"].map((item) => (
-                  <StaggerItem key={item}>
+                {["Impermeabilidade 2500mm", "Canvas Rip-Stop 280g", "Montagem em 60 segundos", "Compatível com a maioria dos veículos"].map((item, i) => (
+                  <StaggerItem key={i}>
                     <div className="flex items-center gap-3 rounded-full border border-[#1a1714]/12 bg-white/35 px-4 py-3 transition-colors duration-200 hover:bg-white/55">
                       <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#1a1714]">
                         <Check size={11} className="text-white" />
@@ -157,7 +159,6 @@ export default async function Home() {
                 <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             </div>
-
             <StaggerReveal className="grid gap-5 md:grid-cols-2" staggerDelay={0.1}>
               {products.map((product) => (
                 <StaggerItem key={product.slug}>
@@ -200,6 +201,20 @@ export default async function Home() {
         </section>
       </Reveal>
     </main>
+  );
+}
+
+function TickerContent() {
+  const words = ["Rooftop Tents", "Outdoor Gear", "Built for the Road", "Portugal"];
+  return (
+    <>
+      {words.map((word) => (
+        <span key={word} className="flex items-center">
+          <span>{word}</span>
+          <span className="mx-8 text-[#c46a2d]">•</span>
+        </span>
+      ))}
+    </>
   );
 }
 

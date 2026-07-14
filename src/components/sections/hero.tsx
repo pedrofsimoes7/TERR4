@@ -6,11 +6,11 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowUpRight, ArrowDown } from "lucide-react";
 
-function Word({ children, delay }: { children: string; delay: number }) {
+function Word({ children, delay }: { children: React.ReactNode; delay: number }) {
   return (
     <motion.span
-      className="inline-block mr-[0.18em]"
-      initial={{ opacity: 0, y: 48, rotateX: -20 }}
+      className="inline-block mr-[0.2em]"
+      initial={{ opacity: 0, y: 44, rotateX: -18 }}
       animate={{ opacity: 1, y: 0, rotateX: 0 }}
       transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}
     >
@@ -29,9 +29,8 @@ export function Hero() {
   const textY     = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
   const fade      = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
-  const words1 = ["Built", "to", "sleep"];
-  const words2 = ["where", "the", "road"];
-  const words3 = ["ends."];
+  const line1 = ["O", "ponto", "de", "partida"];
+  const line2 = ["para", "a"];
 
   return (
     <section ref={ref} className="relative min-h-[100dvh] overflow-hidden bg-[#070706] text-white">
@@ -53,21 +52,29 @@ export function Hero() {
 
         <div className="grid gap-8 lg:grid-cols-[1fr_290px] lg:items-end">
           <div>
-            <motion.p
+            <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               transition={{ duration: 1.4, delay: 0.15 }}
-              className="mb-7 text-[10px] font-black uppercase tracking-[0.48em] text-white/45"
+              className="mb-6 flex items-center gap-3"
             >
-              Rooftop tents&nbsp;&nbsp;·&nbsp;&nbsp;Outdoor gear&nbsp;&nbsp;·&nbsp;&nbsp;Portugal
-            </motion.p>
+              <span className="h-px w-8 bg-[#c46a2d]" />
+              <p className="text-[10px] font-black uppercase tracking-[0.42em] text-white/50">
+                Rooftop tents&nbsp;&nbsp;·&nbsp;&nbsp;Outdoor gear&nbsp;&nbsp;·&nbsp;&nbsp;Portugal
+              </p>
+            </motion.div>
 
             <h1
-              className="text-[4rem] font-black leading-[0.86] tracking-[-0.055em] md:text-[7.6rem]"
+              className="font-black leading-[0.92] tracking-[-0.045em]
+                text-[2.7rem] sm:text-[3.8rem] md:text-[5rem] lg:text-[5.6rem]"
               style={{ perspective: "800px" }}
             >
-              <div>{words1.map((w, i) => <Word key={w} delay={0.3 + i * 0.08}>{w}</Word>)}</div>
-              <div>{words2.map((w, i) => <Word key={w} delay={0.58 + i * 0.08}>{w}</Word>)}</div>
-              <div>{words3.map((w, i) => <Word key={w} delay={0.86 + i * 0.08}>{w}</Word>)}</div>
+              <div>{line1.map((w, i) => <Word key={`${w}-${i}`} delay={0.3 + i * 0.08}>{w}</Word>)}</div>
+              <div>{line2.map((w, i) => <Word key={`${w}-${i}`} delay={0.62 + i * 0.08}>{w}</Word>)}
+                <Word delay={0.82}>
+                  <span>liberdade</span>
+                  <span className="text-[#ffffff]">.</span>
+                </Word>
+              </div>
             </h1>
           </div>
 

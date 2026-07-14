@@ -8,7 +8,6 @@ type GalleryItem = { id: string; url: string; alt?: string | null };
 
 export function GalleryCarousel({ images }: { images: GalleryItem[] }) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [paused, setPaused] = useState(false);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
 
@@ -27,21 +26,7 @@ export function GalleryCarousel({ images }: { images: GalleryItem[] }) {
     el.scrollBy({ left: dir * amount, behavior: "smooth" });
   }
 
-  // auto-play (pausa em hover no desktop, ou enquanto o utilizador interage)
-  useEffect(() => {
-    if (paused || images.length <= 1) return;
-    const interval = setInterval(() => {
-      const el = trackRef.current;
-      if (!el) return;
-      const atEnd = el.scrollLeft >= el.scrollWidth - el.clientWidth - 8;
-      if (atEnd) {
-        el.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        scrollByCards(1);
-      }
-    }, 3200);
-    return () => clearInterval(interval);
-  }, [paused, images.length]);
+  // (auto-play removido — as fotos só andam quando o utilizador quer)
 
   useEffect(() => {
     const el = trackRef.current;
@@ -59,7 +44,6 @@ export function GalleryCarousel({ images }: { images: GalleryItem[] }) {
     const el = trackRef.current;
     if (!el) return;
     drag.current = { active: true, startX: e.pageX, scrollLeft: el.scrollLeft };
-    setPaused(true);
   }
   function onMouseMove(e: React.MouseEvent) {
     const el = trackRef.current;
@@ -71,7 +55,6 @@ export function GalleryCarousel({ images }: { images: GalleryItem[] }) {
   function endDrag() {
     if (!drag.current.active) return;
     drag.current.active = false;
-    setTimeout(() => setPaused(false), 1500);
   }
 
   if (images.length === 0) {
@@ -83,11 +66,7 @@ export function GalleryCarousel({ images }: { images: GalleryItem[] }) {
   }
 
   return (
-    <div
-      className="group/gallery relative"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => { setPaused(false); endDrag(); }}
-    >
+    <div className="group/gallery relative" onMouseLeave={endDrag}>
       {/* setas (escondidas em telemóvel — lá usa-se o swipe nativo) */}
       <button
         type="button"
