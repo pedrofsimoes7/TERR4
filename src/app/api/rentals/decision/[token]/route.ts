@@ -101,11 +101,16 @@ export async function POST(request: Request, { params }: RouteContext) {
 
     return redirectToDecision("payment-sent");
   } catch (error) {
-    console.error("Erro ao criar pagamento do aluguer:", error);
-    await prisma.rental.update({
-      where: { id: rental.id },
-      data: { status: "PENDING_APPROVAL", paymentExpiresAt: null },
-    });
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Erro ao criar pagamento do aluguer:", { rentalId: rental.id, message, error });
+    try {
+      await prisma.rental.update({
+        where: { id: rental.id },
+        data: { status: "PENDING_APPROVAL", paymentExpiresAt: null },
+      });
+    } catch (rollbackError) {
+      console.error("Erro ao repor o pedido de aluguer:", rollbackError);
+    }
     return redirectToDecision("error");
   }
 }

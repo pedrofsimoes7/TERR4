@@ -4,12 +4,14 @@ import { hashRentalToken } from "@/lib/rental-links";
 
 type PageProps = {
   params: Promise<{ token: string }>;
+  searchParams: Promise<{ result?: string }>;
 };
 
 export const dynamic = "force-dynamic";
 
-export default async function RentalDecisionPage({ params }: PageProps) {
+export default async function RentalDecisionPage({ params, searchParams }: PageProps) {
   const { token } = await params;
+  const { result } = await searchParams;
   const rental = await prisma.rental.findUnique({
     where: { decisionTokenHash: hashRentalToken(token) },
     include: { product: true },
@@ -48,6 +50,11 @@ export default async function RentalDecisionPage({ params }: PageProps) {
           <p><strong className="text-white">Total:</strong> {(rental.totalCents / 100).toFixed(2)}€</p>
         </div>
         <p className="mt-6 text-sm leading-6 text-white/55">Ao confirmar, o cliente recebe um link Stripe válido por 24 horas para pagar o aluguer. A caução continua a ser cobrada na recolha.</p>
+        {result === "error" && (
+          <p className="mt-5 rounded-2xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm leading-6 text-red-100">
+            Não foi possível preparar o pagamento ou enviar o email ao cliente. Tenta novamente; se o erro continuar, verifica os logs da função no Vercel.
+          </p>
+        )}
         <form action={`/api/rentals/decision/${token}`} method="post" className="mt-8 grid gap-3 sm:grid-cols-2">
           <button name="decision" value="approve" className="rounded-full bg-[#f4efe4] px-5 py-3 text-sm font-black text-neutral-950 transition hover:bg-white">Confirmar disponibilidade</button>
           <button name="decision" value="reject" className="rounded-full border border-red-400/35 px-5 py-3 text-sm font-black text-red-200 transition hover:bg-red-500/15">Recusar pedido</button>

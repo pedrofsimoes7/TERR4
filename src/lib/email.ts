@@ -1,7 +1,7 @@
 import { resend } from "@/lib/resend";
 
 // Email do negócio (avisos internos + para onde vão as respostas dos clientes)
-const ADMIN_EMAIL = "terr4geral@gmail.com";
+const ADMIN_EMAIL = "pfs.pedrosimoes@gmail.com";
 
 const COLORS = {
   text: "#1a1714",
@@ -459,6 +459,9 @@ export async function sendRentalPaymentEmail({
     subject: "Conclui o pagamento para confirmar a tua reserva",
     html,
   });
+  if (result.error) {
+    throw new Error(`Resend recusou o email de pagamento: ${result.error.message}`);
+  }
   return result.data?.id;
 }
 
