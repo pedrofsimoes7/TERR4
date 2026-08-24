@@ -124,8 +124,6 @@ export function RentalCalendar({
       customerEmail: String(formData.get("email") || ""),
       customerPhone: String(formData.get("phone") || ""),
       notes: String(formData.get("notes") || ""),
-      totalCents: total * 100,
-      depositCents: DEPOSIT * 100,
     };
 
     try {
@@ -149,10 +147,10 @@ export function RentalCalendar({
         <div className="mx-auto flex size-16 items-center justify-center rounded-full border border-[#2d4a2d]/50 bg-[#2d4a2d]/25 text-green-300">
           <Check size={28} />
         </div>
-        <h3 className="mt-6 text-3xl font-black tracking-[-0.03em] text-white">Pedido enviado!</h3>
+        <h3 className="mt-6 text-3xl font-black tracking-[-0.03em] text-white">Pedido recebido!</h3>
         <p className="mx-auto mt-3 max-w-sm text-sm leading-7 text-[#c8c4be]/60">
-          Recebemos o teu pedido de aluguer. Entramos em contacto contigo para confirmar a
-          disponibilidade e combinar a entrega. O pagamento é feito após confirmação.
+          Estamos a confirmar a disponibilidade. Recebes uma resposta por email em até 24 horas;
+          se houver disponibilidade, enviamos-te o link para pagar e confirmar a reserva.
         </p>
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-left">
           <Row label="Datas" value={`${rangeStart?.toLocaleDateString("pt-PT")} → ${rangeEnd?.toLocaleDateString("pt-PT")}`} />
@@ -259,7 +257,7 @@ export function RentalCalendar({
             </div>
 
             <p className="mt-3 text-center text-[11px] leading-5 text-white/30">
-              Pagamento após confirmação · Caução de {DEPOSIT}€ devolvida após verificação do material
+              Pagamento online após confirmação de disponibilidade · Caução de {DEPOSIT}€ paga na recolha
             </p>
 
             {!showForm ? (
@@ -279,7 +277,7 @@ export function RentalCalendar({
                   className="w-full resize-none rounded-[1.25rem] border border-white/10 bg-white/[0.04] p-4 text-white outline-none placeholder:text-white/30 focus:border-[#c46a2d]/60" />
                 <button type="submit" disabled={submitting}
                   className="btn-wipe flex h-12 w-full items-center justify-center rounded-full bg-[#f4efe4] text-sm font-black uppercase tracking-[0.1em] text-neutral-950 transition hover:-translate-y-0.5 hover:bg-white active:scale-[0.98] disabled:opacity-50">
-                  {submitting ? "A enviar..." : "Pedir reserva"}
+                  {submitting ? "A enviar..." : "Enviar pedido"}
                 </button>
               </form>
             )}

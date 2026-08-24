@@ -4,8 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import {
   sendOrderPaidEmail,
-  sendAdminNewOrderEmail,
-  sendAdminLowStockEmail,
+  sendCompanyNewOrderEmail,
+  sendCompanyRentalPaidEmail,
+  sendRentalPaidEmail,
 } from "@/lib/email";
 
 export async function POST(request: Request) {
@@ -28,8 +29,80 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid webhook signature" }, { status: 400 });
   }
 
+  if (event.type === "checkout.session.expired") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const rentalId = session.metadata?.rentalId;
+
+    if (rentalId) {
+      await prisma.rental.updateMany({
+        where: {
+          id: rentalId,
+          status: "AWAITING_PAYMENT",
+          stripeCheckoutSessionId: session.id,
+        },
+        data: { status: "EXPIRED" },
+      });
+    }
+
+    return NextResponse.json({ received: true });
+  }
+
   if (event.type === "payment_intent.succeeded") {
     const paymentIntent = event.data.object as Stripe.PaymentIntent;
+    const rentalId = paymentIntent.metadata.rentalId;
+
+    if (rentalId && paymentIntent.metadata.paymentType === "rental") {
+      const rental = await prisma.rental.findUnique({
+        where: { id: rentalId },
+        include: { product: true },
+      });
+
+      if (!rental || rental.status === "PAID") {
+        return NextResponse.json({ received: true });
+      }
+
+      const paid = await prisma.rental.updateMany({
+        where: {
+          id: rental.id,
+          status: "AWAITING_PAYMENT",
+          paymentExpiresAt: { gt: new Date() },
+        },
+        data: {
+          status: "PAID",
+          paidAt: new Date(),
+          stripePaymentIntentId: paymentIntent.id,
+        },
+      });
+
+      if (paid.count === 1) {
+        try {
+          await Promise.all([
+            sendRentalPaidEmail({
+              customerName: rental.customerName,
+              customerEmail: rental.customerEmail,
+              productName: rental.product.name,
+              startDate: rental.startDate,
+              endDate: rental.endDate,
+              total: rental.totalCents,
+            }),
+            sendCompanyRentalPaidEmail({
+              customerName: rental.customerName,
+              customerEmail: rental.customerEmail,
+              customerPhone: rental.customerPhone,
+              productName: rental.product.name,
+              startDate: rental.startDate,
+              endDate: rental.endDate,
+              total: rental.totalCents,
+            }),
+          ]);
+        } catch (error) {
+          console.error("Failed to send rental paid emails:", error);
+        }
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
     const orderId = paymentIntent.metadata.orderId;
 
     if (!orderId) {
@@ -77,43 +150,14 @@ export async function POST(request: Request) {
 
       // 2) Aviso interno ao terr4geral (nova encomenda)
       try {
-        await sendAdminNewOrderEmail({
+        await sendCompanyNewOrderEmail({
           customerName: order.customerName,
           customerEmail: order.customerEmail,
           orderId: order.id,
           total: order.totalCents,
         });
       } catch (error) {
-        console.error("Failed to send admin new order email:", error);
-      }
-
-      // 3) Decrementar stock + avisar se chegar a <=1 unidade
-      for (const item of order.items) {
-        if (!item.productId) continue;
-
-        try {
-          const product = await prisma.product.findUnique({
-            where: { id: item.productId },
-          });
-
-          if (!product) continue;
-
-          const newStock = Math.max(0, product.stock - item.quantity);
-
-          await prisma.product.update({
-            where: { id: product.id },
-            data: { stock: newStock },
-          });
-
-          if (newStock <= 1) {
-            await sendAdminLowStockEmail({
-              productName: product.name,
-              stock: newStock,
-            });
-          }
-        } catch (error) {
-          console.error("Failed to update stock / send low stock email:", error);
-        }
+        console.error("Failed to send company new order email:", error);
       }
     }
   }

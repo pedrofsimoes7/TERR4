@@ -1,10 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Check, Package, Ruler, Shield, Truck, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { AddToCartButton } from "@/components/ui/add-to-cart-button";
-import { ReserveButton } from "@/components/ui/reserve-button";
 import { Reveal, StaggerReveal, StaggerItem } from "@/components/motion/reveal";
 import { formatPrice } from "@/lib/utils";
 import { getProductBySlug, getProducts } from "@/lib/products";
@@ -107,12 +104,14 @@ export default async function ProductPage({ params }: PageProps) {
                   </div>
  
 
-                  {/* Botões: disponível → carrinho; sem stock → reserva */}
+                  {/* Botões: disponível → carrinho; sem stock → indisponível */}
                   <div className="mt-8">
                     {isAvailable ? (
                       <AddToCartButton product={product} />
                     ) : (
-                      <ReserveButton product={product} />
+                      <div className="rounded-full border border-white/10 px-6 py-3 text-center text-sm font-black uppercase tracking-[0.1em] text-white/45">
+                        Indisponível
+                      </div>
                     )}
                   </div>
 
@@ -238,7 +237,7 @@ export default async function ProductPage({ params }: PageProps) {
         </Reveal>
       )}
 
-      {/* Barra fixa mobile: carrinho se disponível, reserva se sem stock */}
+      {/* Barra fixa mobile: carrinho se disponível, indisponível se sem stock */}
       {product.price && (
         <div className="fixed inset-x-0 bottom-0 z-[80] border-t border-white/10 bg-[#070706] px-4 pt-3 pb-[calc(20px+env(safe-area-inset-bottom))] md:hidden">
           <div className="flex items-center justify-between gap-3">
@@ -250,7 +249,9 @@ export default async function ProductPage({ params }: PageProps) {
               {isAvailable ? (
                 <AddToCartButton product={product} />
               ) : (
-                <ReserveButton product={product} />
+                <div className="rounded-full border border-white/10 px-4 py-3 text-center text-xs font-black uppercase tracking-[0.08em] text-white/45">
+                  Indisponível
+                </div>
               )}
             </div>
           </div>

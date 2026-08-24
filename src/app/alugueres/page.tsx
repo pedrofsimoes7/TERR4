@@ -1,6 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowLeft, Calendar, Truck, Shield, CreditCard, Check } from "lucide-react";
+import { Calendar, Truck, Shield, CreditCard, Check } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Reveal, StaggerReveal, StaggerItem } from "@/components/motion/reveal";
 import { RentalCalendar } from "@/components/ui/rental-calendar";
@@ -19,11 +18,18 @@ export default async function RentalsPage() {
     include: { images: { orderBy: { sortOrder: "asc" } } },
   });
 
-  // Datas reservadas (pendentes + aprovadas)
+  // Datas ocupadas: pedidos temporários, pagamentos pendentes e alugueres pagos.
   let bookedRanges: { start: string; end: string }[] = [];
   if (product) {
     const rentals = await prisma.rental.findMany({
-      where: { productId: product.id, status: { in: ["PENDING", "APPROVED"] } },
+      where: {
+        productId: product.id,
+        OR: [
+          { status: "PAID" },
+          { status: "PENDING_APPROVAL", decisionExpiresAt: { gt: new Date() } },
+          { status: "AWAITING_PAYMENT", paymentExpiresAt: { gt: new Date() } },
+        ],
+      },
       select: { startDate: true, endDate: true },
     });
     bookedRanges = rentals.map((r) => ({
@@ -73,9 +79,9 @@ export default async function RentalsPage() {
           <StaggerReveal className="mt-12 grid gap-5 md:grid-cols-4">
             {[
               { icon: <Calendar size={22} />, step: "01", title: "Escolhe as datas", text: "Seleciona o período no calendário. Vês logo o preço total." },
-              { icon: <Check size={22} />, step: "02", title: "Preenche o pedido", text: "Deixa os teus dados de contacto e envia o pedido de reserva." },
-              { icon: <Truck size={22} />, step: "03", title: "Recolhe e devolve", text: "Combinamos contigo. A recolha e devolução são feitas pelo cliente." },
-              { icon: <CreditCard size={22} />, step: "04", title: "Paga na confirmação", text: "O pagamento é feito após confirmarmos a disponibilidade." },
+              { icon: <Check size={22} />, step: "02", title: "Envia o pedido", text: "Deixa os teus dados. Mantemos as datas durante a confirmação de disponibilidade." },
+              { icon: <CreditCard size={22} />, step: "03", title: "Paga online", text: "Quando houver disponibilidade, recebes um link de pagamento válido por 24 horas." },
+              { icon: <Truck size={22} />, step: "04", title: "Recolhe e devolve", text: "Depois do pagamento, combinamos contigo a recolha. A caução é paga nesse momento." },
             ].map((s) => (
               <StaggerItem key={s.step}>
                 <div className="card-hover-glow group h-full rounded-[1.75rem] border border-white/10 bg-[#151411] p-6 transition duration-300">
@@ -104,8 +110,8 @@ export default async function RentalsPage() {
                 Pronto para partir?
               </h2>
               <p className="mt-5 max-w-md text-base leading-7 text-[#c8c4be]/60">
-                Escolhe as tuas datas ao lado e envia o pedido. Confirmamos a
-                disponibilidade e combinamos a entrega contigo.
+                Escolhe as tuas datas e envia o pedido. Confirmamos a disponibilidade
+                em até 24 horas; depois recebes um link para pagar e organizar a recolha.
               </p>
 
               <div className="mt-8 space-y-3">
@@ -147,7 +153,7 @@ export default async function RentalsPage() {
 
           <StaggerReveal className="mt-10 space-y-4">
             {[
-              { q: "Como é feito o pagamento?", a: "O pagamento é feito apenas depois de confirmarmos a disponibilidade das datas que escolheste. Entramos em contacto contigo para combinar." },
+              { q: "Como é feito o pagamento?", a: "Depois de confirmarmos a disponibilidade, recebes um link seguro para pagar o valor total online. O link é válido durante 24 horas." },
               { q: "O que é a caução?", a: "A caução de 400€ é um valor de segurança que garante o bom estado do material. É totalmente devolvida após verificarmos o equipamento na devolução." },
               { q: "Quem trata da entrega?", a: "A recolha e a devolução são feitas pelo cliente. Combinamos contigo o local e horário." },
               { q: "Posso alugar por quantos dias quiser?", a: "Sim. Escolhes o período que precisares no calendário e o valor é calculado automaticamente a 40€/dia." },

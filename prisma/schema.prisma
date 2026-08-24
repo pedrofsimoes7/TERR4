@@ -147,10 +147,12 @@ model OrderItem {
 }
 
 enum RentalStatus {
-  PENDING    // pedido recebido, à espera de aprovação
-  APPROVED   // aprovado pelo admin
-  REJECTED   // rejeitado pelo admin
-  CANCELLED  // cancelado
+  PENDING_APPROVAL // pedido temporário, à espera da decisão da empresa
+  AWAITING_PAYMENT // disponibilidade confirmada; pagamento pendente
+  PAID             // pagamento confirmado pela Stripe
+  REJECTED         // indisponível ou recusado pela empresa
+  EXPIRED          // decisão ou pagamento não concluído dentro do prazo
+  CANCELLED        // cancelado
 }
 
 model Rental {
@@ -174,7 +176,15 @@ model Rental {
   totalCents    Int          @default(0)
 
   // Estado
-  status        RentalStatus @default(PENDING)
+  status        RentalStatus @default(PENDING_APPROVAL)
+
+  // Links seguros enviados por email. Apenas os hashes são guardados.
+  decisionTokenHash       String?   @unique
+  decisionExpiresAt       DateTime?
+  paymentExpiresAt        DateTime?
+  stripeCheckoutSessionId String?   @unique
+  stripePaymentIntentId   String?   @unique
+  paidAt                  DateTime?
 
   // Notas
   notes         String?

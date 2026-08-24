@@ -1,40 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { jwtVerify } from "jose";
 
-const SESSION_NAME = "terr4-admin-session";
-
-const secret = new TextEncoder().encode(
-  process.env.ADMIN_SESSION_SECRET || "dev-secret-change-this"
-);
-
-// No Next.js 16, o antigo "middleware" passou a chamar-se "proxy".
-// A função tem de se chamar `proxy` e o ficheiro `proxy.ts`.
-export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // A página de login é a única rota /admin aberta.
-  if (pathname === "/admin/login") {
-    return NextResponse.next();
-  }
-
-  // Protege todo o resto de /admin
-  if (pathname.startsWith("/admin")) {
-    const token = request.cookies.get(SESSION_NAME)?.value;
-
-    if (!token) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
-    }
-
-    try {
-      await jwtVerify(token, secret);
-      return NextResponse.next();
-    } catch {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
-    }
-  }
-
-  return NextResponse.next();
+// A gestão está temporariamente suspensa. O código encontra-se arquivado em
+// src/archived/admin-dashboard para poder ser reposto mais tarde.
+export function proxy(request: NextRequest) {
+  return NextResponse.redirect(new URL("/", request.url));
 }
 
 export const config = {

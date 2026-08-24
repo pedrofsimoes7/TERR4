@@ -2,7 +2,6 @@ import { Star } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Reveal, StaggerReveal, StaggerItem } from "@/components/motion/reveal";
 import { GalleryCarousel } from "@/components/ui/gallery-carousel";
-import { ReviewForm } from "@/components/ui/review-form";
 
 export const dynamic = "force-dynamic";
 
@@ -85,13 +84,13 @@ export default async function GalleryPage() {
             </div>
           </Reveal>
 
-          <div className="mt-12 grid gap-10 lg:grid-cols-[1.4fr_1fr] lg:items-start">
+          <div className="mt-12">
             {/* lista de reviews */}
             <div>
               {reviews.length === 0 ? (
                 <div className="rounded-[2rem] border border-dashed border-white/12 bg-white/[0.02] p-12 text-center">
                   <h3 className="text-xl font-black text-white">Ainda sem avaliações</h3>
-                  <p className="mt-3 text-sm text-white/45">Sê o primeiro a partilhar a tua experiência.</p>
+                  <p className="mt-3 text-sm text-white/45">As avaliações de clientes aparecerão aqui.</p>
                 </div>
               ) : (
                 <StaggerReveal className="grid gap-4 sm:grid-cols-2">
@@ -117,13 +116,6 @@ export default async function GalleryPage() {
                   ))}
                 </StaggerReveal>
               )}
-            </div>
-
-            {/* form */}
-            <div className="lg:sticky lg:top-28">
-              <Reveal delay={0.1}>
-                <ReviewForm />
-              </Reveal>
             </div>
           </div>
         </div>

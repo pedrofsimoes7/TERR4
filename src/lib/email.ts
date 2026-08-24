@@ -217,6 +217,7 @@ export async function sendRentalRequestEmail({
   endDate,
   total,
   deposit,
+  expiresAt,
 }: {
   customerName: string;
   customerEmail: string;
@@ -225,19 +226,20 @@ export async function sendRentalRequestEmail({
   endDate: Date;
   total: number;
   deposit: number;
+  expiresAt: Date;
 }) {
   const html = baseEmail({
     preheader: `Recebemos o teu pedido de aluguer da ${productName}.`,
     heading: "Recebemos o teu pedido",
     bodyHtml: `
       <p style="margin:0 0 16px;">Olá ${customerName},</p>
-      <p style="margin:0 0 4px;">Recebemos o teu pedido de aluguer da <strong style="color:${COLORS.heading};">${productName}</strong>. Vamos verificar a disponibilidade e entrar em contacto contigo muito em breve.</p>
+      <p style="margin:0 0 4px;">Recebemos o teu pedido de aluguer da <strong style="color:${COLORS.heading};">${productName}</strong>. Estamos a confirmar a disponibilidade e damos-te uma resposta até ${formatDatePT(expiresAt)}.</p>
       ${detailBox([
         { label: "Datas", value: `${formatDatePT(startDate)} a ${formatDatePT(endDate)}` },
         { label: "Total do aluguer", value: formatEuros(total) },
         { label: "Caução (devolvida)", value: formatEuros(deposit) },
       ])}
-      <p style="margin:0;font-size:13px;color:${COLORS.textSoft};">O pagamento é feito após a confirmação. A recolha e a devolução são da responsabilidade do cliente, e a caução é devolvida após verificação do estado do material.</p>
+      <p style="margin:0;font-size:13px;color:${COLORS.textSoft};">Se houver disponibilidade, recebes um link para pagar o aluguer. A caução é paga na recolha e devolvida após verificação do material.</p>
     `,
   });
 
@@ -246,46 +248,6 @@ export async function sendRentalRequestEmail({
     to: customerEmail,
     replyTo: ADMIN_EMAIL,
     subject: "Recebemos o teu pedido de aluguer",
-    html,
-  });
-  return result.data?.id;
-}
-
-// ════════════════════════════════════════════════════════════════════
-// CLIENTE — aluguer aprovado
-// ════════════════════════════════════════════════════════════════════
-export async function sendRentalApprovedEmail({
-  customerName,
-  customerEmail,
-  productName,
-  startDate,
-  endDate,
-}: {
-  customerName: string;
-  customerEmail: string;
-  productName: string;
-  startDate: Date;
-  endDate: Date;
-}) {
-  const html = baseEmail({
-    preheader: `A tua reserva da ${productName} está confirmada.`,
-    heading: "A tua reserva está confirmada",
-    bodyHtml: `
-      <p style="margin:0 0 16px;">Olá ${customerName},</p>
-      <p style="margin:0 0 4px;">Boas notícias. A tua reserva da <strong style="color:${COLORS.heading};">${productName}</strong> foi aprovada e está garantida para as datas escolhidas.</p>
-      ${detailBox([
-        { label: "Datas", value: `${formatDatePT(startDate)} a ${formatDatePT(endDate)}` },
-      ])}
-      <p style="margin:0 0 16px;">Vamos combinar contigo os detalhes da recolha. O pagamento e a caução são tratados no momento da entrega.</p>
-      <p style="margin:0;font-size:13px;color:${COLORS.textSoft};">Se tiveres alguma questão, basta responder a este email.</p>
-    `,
-  });
-
-  const result = await resend.emails.send({
-    from: process.env.EMAIL_FROM!,
-    to: customerEmail,
-    replyTo: ADMIN_EMAIL,
-    subject: "A tua reserva está confirmada",
     html,
   });
   return result.data?.id;
@@ -323,43 +285,6 @@ export async function sendRentalRejectedEmail({
     to: customerEmail,
     replyTo: ADMIN_EMAIL,
     subject: "Sobre o teu pedido de aluguer",
-    html,
-  });
-  return result.data?.id;
-}
-
-// ════════════════════════════════════════════════════════════════════
-// CLIENTE — aluguer cancelado
-// ════════════════════════════════════════════════════════════════════
-export async function sendRentalCancelledEmail({
-  customerName,
-  customerEmail,
-  productName,
-  startDate,
-  endDate,
-}: {
-  customerName: string;
-  customerEmail: string;
-  productName: string;
-  startDate: Date;
-  endDate: Date;
-}) {
-  const html = baseEmail({
-    preheader: "A tua reserva foi cancelada.",
-    heading: "A tua reserva foi cancelada",
-    bodyHtml: `
-      <p style="margin:0 0 16px;">Olá ${customerName},</p>
-      <p style="margin:0 0 4px;">A tua reserva da <strong style="color:${COLORS.heading};">${productName}</strong> para as datas de ${formatDatePT(startDate)} a ${formatDatePT(endDate)} foi cancelada.</p>
-      <p style="margin:16px 0 0;">Se foi engano, ou se quiseres remarcar para outras datas, fala connosco. Teremos todo o gosto em ajudar.</p>
-      ${button("Fazer nova reserva", `${APP_URL}/alugueres`)}
-    `,
-  });
-
-  const result = await resend.emails.send({
-    from: process.env.EMAIL_FROM!,
-    to: customerEmail,
-    replyTo: ADMIN_EMAIL,
-    subject: "A tua reserva foi cancelada",
     html,
   });
   return result.data?.id;
@@ -437,27 +362,45 @@ export async function sendBackInStockEmail({
 }
 
 // ════════════════════════════════════════════════════════════════════
-// INTERNO — nova reserva de stock (-> terr4geral)
+// EMPRESA — decisão sobre um pedido de aluguer
 // ════════════════════════════════════════════════════════════════════
-export async function sendAdminNewReservationEmail({
+export async function sendCompanyRentalDecisionEmail({
   customerName,
   customerEmail,
+  customerPhone,
   productName,
+  startDate,
+  endDate,
+  total,
+  decisionUrl,
+  expiresAt,
 }: {
   customerName: string;
   customerEmail: string;
+  customerPhone?: string | null;
   productName: string;
+  startDate: Date;
+  endDate: Date;
+  total: number;
+  decisionUrl: string;
+  expiresAt: Date;
 }) {
+  const rows = [
+    { label: "Produto", value: productName },
+    { label: "Cliente", value: customerName },
+    { label: "Email", value: customerEmail },
+  ];
+  if (customerPhone) rows.push({ label: "Telefone", value: customerPhone });
+  rows.push({ label: "Datas", value: `${formatDatePT(startDate)} a ${formatDatePT(endDate)}` });
+  rows.push({ label: "Total", value: formatEuros(total) });
+
   const html = baseEmail({
-    preheader: `Nova reserva de ${productName}.`,
-    heading: "Nova reserva de stock",
+    preheader: `Pedido de aluguer de ${customerName} à espera de decisão.`,
+    heading: "Decidir pedido de aluguer",
     bodyHtml: `
-      <p style="margin:0 0 4px;">Um cliente reservou um produto que está esgotado. Quando repuseres o stock no painel, ele será avisado automaticamente.</p>
-      ${detailBox([
-        { label: "Produto", value: productName },
-        { label: "Cliente", value: customerName },
-        { label: "Email", value: customerEmail },
-      ])}
+      <p style="margin:0 0 4px;">Confirma ou recusa a disponibilidade até ${formatDatePT(expiresAt)}. Não é necessário entrar num painel.</p>
+      ${detailBox(rows)}
+      ${button("Confirmar ou recusar", decisionUrl)}
     `,
   });
 
@@ -465,16 +408,107 @@ export async function sendAdminNewReservationEmail({
     from: process.env.EMAIL_FROM!,
     to: ADMIN_EMAIL,
     replyTo: customerEmail,
-    subject: `Nova reserva (sem stock): ${productName}`,
+    subject: `Decisão necessária: aluguer de ${customerName}`,
     html,
   });
   return result.data?.id;
 }
 
 // ════════════════════════════════════════════════════════════════════
-// INTERNO — novo pedido de aluguer (-> terr4geral)
+// CLIENTE — disponibilidade confirmada; pagamento pendente
 // ════════════════════════════════════════════════════════════════════
-export async function sendAdminNewRentalEmail({
+export async function sendRentalPaymentEmail({
+  customerName,
+  customerEmail,
+  productName,
+  startDate,
+  endDate,
+  total,
+  paymentUrl,
+  expiresAt,
+}: {
+  customerName: string;
+  customerEmail: string;
+  productName: string;
+  startDate: Date;
+  endDate: Date;
+  total: number;
+  paymentUrl: string;
+  expiresAt: Date;
+}) {
+  const html = baseEmail({
+    preheader: `A ${productName} está disponível para as datas escolhidas.`,
+    heading: "A tua reserva está disponível",
+    bodyHtml: `
+      <p style="margin:0 0 16px;">Olá ${customerName},</p>
+      <p style="margin:0 0 4px;">A <strong style="color:${COLORS.heading};">${productName}</strong> está disponível para as datas escolhidas. Para confirmares a reserva, conclui o pagamento até ${formatDatePT(expiresAt)}.</p>
+      ${detailBox([
+        { label: "Datas", value: `${formatDatePT(startDate)} a ${formatDatePT(endDate)}` },
+        { label: "Total do aluguer", value: formatEuros(total) },
+        { label: "Caução", value: "Paga na recolha" },
+      ])}
+      ${button("Pagar aluguer", paymentUrl)}
+      <p style="margin:16px 0 0;font-size:13px;color:${COLORS.textSoft};">Depois do pagamento, entraremos em contacto para organizar a recolha.</p>
+    `,
+  });
+
+  const result = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to: customerEmail,
+    replyTo: ADMIN_EMAIL,
+    subject: "Conclui o pagamento para confirmar a tua reserva",
+    html,
+  });
+  return result.data?.id;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CLIENTE — pagamento de aluguer confirmado
+// ════════════════════════════════════════════════════════════════════
+export async function sendRentalPaidEmail({
+  customerName,
+  customerEmail,
+  productName,
+  startDate,
+  endDate,
+  total,
+}: {
+  customerName: string;
+  customerEmail: string;
+  productName: string;
+  startDate: Date;
+  endDate: Date;
+  total: number;
+}) {
+  const html = baseEmail({
+    preheader: `O pagamento do aluguer da ${productName} foi confirmado.`,
+    heading: "Reserva confirmada",
+    bodyHtml: `
+      <p style="margin:0 0 16px;">Olá ${customerName},</p>
+      <p style="margin:0 0 4px;">Confirmámos o pagamento da tua reserva da <strong style="color:${COLORS.heading};">${productName}</strong>.</p>
+      ${detailBox([
+        { label: "Datas", value: `${formatDatePT(startDate)} a ${formatDatePT(endDate)}` },
+        { label: "Pago", value: formatEuros(total) },
+        { label: "Caução", value: "Paga na recolha" },
+      ])}
+      <p style="margin:0;">Entraremos em contacto contigo muito em breve para organizar a recolha.</p>
+    `,
+  });
+
+  const result = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to: customerEmail,
+    replyTo: ADMIN_EMAIL,
+    subject: "Pagamento confirmado — reserva TERR4",
+    html,
+  });
+  return result.data?.id;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// EMPRESA — pagamento de aluguer confirmado
+// ════════════════════════════════════════════════════════════════════
+export async function sendCompanyRentalPaidEmail({
   customerName,
   customerEmail,
   customerPhone,
@@ -492,21 +526,21 @@ export async function sendAdminNewRentalEmail({
   total: number;
 }) {
   const rows = [
-    { label: "Produto", value: productName },
     { label: "Cliente", value: customerName },
     { label: "Email", value: customerEmail },
+    { label: "Produto", value: productName },
+    { label: "Datas", value: `${formatDatePT(startDate)} a ${formatDatePT(endDate)}` },
+    { label: "Pago", value: formatEuros(total) },
+    { label: "Caução", value: "Cobrar na recolha" },
   ];
-  if (customerPhone) rows.push({ label: "Telefone", value: customerPhone });
-  rows.push({ label: "Datas", value: `${formatDatePT(startDate)} a ${formatDatePT(endDate)}` });
-  rows.push({ label: "Total", value: formatEuros(total) });
+  if (customerPhone) rows.splice(2, 0, { label: "Telefone", value: customerPhone });
 
   const html = baseEmail({
-    preheader: `Novo pedido de aluguer de ${customerName}.`,
-    heading: "Novo pedido de aluguer",
+    preheader: `Pagamento confirmado para o aluguer de ${customerName}.`,
+    heading: "Aluguer pago — organizar recolha",
     bodyHtml: `
-      <p style="margin:0 0 4px;">Há um novo pedido de aluguer à espera de aprovação.</p>
+      <p style="margin:0 0 4px;">O cliente já pagou o aluguer. Contacta-o para combinar a recolha e a caução.</p>
       ${detailBox(rows)}
-      ${button("Ver no painel", `${APP_URL}/admin/rentals`)}
     `,
   });
 
@@ -514,16 +548,16 @@ export async function sendAdminNewRentalEmail({
     from: process.env.EMAIL_FROM!,
     to: ADMIN_EMAIL,
     replyTo: customerEmail,
-    subject: `Novo pedido de aluguer: ${customerName}`,
+    subject: `Aluguer pago: ${customerName}`,
     html,
   });
   return result.data?.id;
 }
 
 // ════════════════════════════════════════════════════════════════════
-// INTERNO — nova encomenda paga (-> terr4geral)
+// EMPRESA — nova encomenda paga
 // ════════════════════════════════════════════════════════════════════
-export async function sendAdminNewOrderEmail({
+export async function sendCompanyNewOrderEmail({
   customerName,
   customerEmail,
   orderId,
@@ -545,7 +579,7 @@ export async function sendAdminNewOrderEmail({
         { label: "Email", value: customerEmail },
         { label: "Total", value: formatEuros(total) },
       ])}
-      ${button("Ver no painel", `${APP_URL}/admin/orders`)}
+      <p style="margin:0;">Prepara a encomenda e responde diretamente ao cliente se precisares de mais informações.</p>
     `,
   });
 
@@ -558,35 +592,6 @@ export async function sendAdminNewOrderEmail({
   });
   return result.data?.id;
 }
-
-// ════════════════════════════════════════════════════════════════════
-// INTERNO — stock baixo (-> terr4geral)
-// ════════════════════════════════════════════════════════════════════
-export async function sendAdminLowStockEmail({
-  productName,
-  stock,
-}: {
-  productName: string;
-  stock: number;
-}) {
-  const html = baseEmail({
-    preheader: `${productName} está com pouco stock.`,
-    heading: "Stock a acabar",
-    bodyHtml: `
-      <p style="margin:0 0 4px;">O produto <strong style="color:${COLORS.heading};">${productName}</strong> está com apenas <strong style="color:${COLORS.heading};">${stock} unidade${stock === 1 ? "" : "s"}</strong> em stock. Pode ser boa altura para repor.</p>
-      ${button("Gerir produtos", `${APP_URL}/admin/products`)}
-    `,
-  });
-
-  const result = await resend.emails.send({
-    from: process.env.EMAIL_FROM!,
-    to: ADMIN_EMAIL,
-    subject: `Stock a acabar: ${productName}`,
-    html,
-  });
-  return result.data?.id;
-}
-
 
 // ════════════════════════════════════════════════════════════════════
 // INTERNO — nova mensagem de contacto (-> terr4geral)
