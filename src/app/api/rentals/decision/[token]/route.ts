@@ -58,6 +58,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://terr4.pt";
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      ui_mode: "embedded_page",
       customer_email: rental.customerEmail,
       expires_at: Math.floor(paymentExpiresAt.getTime() / 1000),
       line_items: [
@@ -78,13 +79,12 @@ export async function POST(request: Request, { params }: RouteContext) {
         metadata: { rentalId: rental.id, paymentType: "rental" },
         receipt_email: rental.customerEmail,
       },
-      success_url: `${appUrl}/alugueres/pagamento-confirmado?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/alugueres`,
+      return_url: `${appUrl}/alugueres/pagamento-confirmado?session_id={CHECKOUT_SESSION_ID}`,
     }, {
       idempotencyKey: `rental-${rental.id}-${paymentExpiresAt.getTime()}`,
     });
 
-    if (!session.url) throw new Error("A Stripe não devolveu um link de pagamento.");
+    if (!session.client_secret) throw new Error("A Stripe não preparou o pagamento incorporado.");
     createdSessionId = session.id;
 
     await prisma.rental.update({
@@ -99,7 +99,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       startDate: rental.startDate,
       endDate: rental.endDate,
       total: rental.totalCents,
-      paymentUrl: session.url,
+      paymentUrl: `${appUrl}/alugueres/pagamento/${token}`,
       expiresAt: paymentExpiresAt,
     });
 
