@@ -1,7 +1,10 @@
 import { resend } from "@/lib/resend";
 
 // Email do negócio (avisos internos + para onde vão as respostas dos clientes)
-const ADMIN_EMAIL = process.env.COMPANY_EMAIL || "terr4geral@gmail.com";
+const ADMIN_EMAIL =
+  process.env.ADMIN_EMAIL ||
+  process.env.COMPANY_EMAIL ||
+  "pfs.pedrosimoes@gmail.com";
 
 const COLORS = {
   text: "#1a1714",
