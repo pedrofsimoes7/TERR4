@@ -122,6 +122,7 @@ model Order {
   invoiceNumber           String?   @unique
   invoiceSentAt           DateTime?
   invoiceEmailId          String?
+  companyPaidEmailSentAt  DateTime?
 
   customerUserId          String?
   customerUser            CustomerUser? @relation(fields: [customerUserId], references: [id], onDelete: SetNull)
@@ -185,6 +186,8 @@ model Rental {
   stripeCheckoutSessionId String?   @unique
   stripePaymentIntentId   String?   @unique
   paidAt                  DateTime?
+  customerPaidEmailSentAt DateTime?
+  companyPaidEmailSentAt  DateTime?
 
   // Notas
   notes         String?

@@ -1,7 +1,7 @@
 import { resend } from "@/lib/resend";
 
 // Email do negócio (avisos internos + para onde vão as respostas dos clientes)
-const ADMIN_EMAIL = "pfs.pedrosimoes@gmail.com";
+const ADMIN_EMAIL = process.env.COMPANY_EMAIL || "terr4geral@gmail.com";
 
 const COLORS = {
   text: "#1a1714",
@@ -31,6 +31,15 @@ function formatEuros(cents: number) {
     style: "currency",
     currency: "EUR",
   }).format(cents / 100);
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 /**
@@ -123,8 +132,8 @@ function detailBox(rows: { label: string; value: string }[]) {
     .map(
       (r, i) => `
       <tr>
-        <td style="padding:${i === 0 ? "0" : "10px"} 0 0;font-size:14px;color:${COLORS.textSoft};font-family:Arial,Helvetica,sans-serif;">${r.label}</td>
-        <td align="right" style="padding:${i === 0 ? "0" : "10px"} 0 0;font-size:14px;font-weight:700;color:${COLORS.heading};font-family:Arial,Helvetica,sans-serif;">${r.value}</td>
+        <td style="padding:${i === 0 ? "0" : "10px"} 0 0;font-size:14px;color:${COLORS.textSoft};font-family:Arial,Helvetica,sans-serif;">${escapeHtml(r.label)}</td>
+        <td align="right" style="padding:${i === 0 ? "0" : "10px"} 0 0;font-size:14px;font-weight:700;color:${COLORS.heading};font-family:Arial,Helvetica,sans-serif;">${escapeHtml(r.value)}</td>
       </tr>`
     )
     .join("");
@@ -170,6 +179,9 @@ export async function sendOrderPaidEmail({
     subject: "Pagamento confirmado",
     html,
   });
+  if (result.error || !result.data?.id) {
+    throw new Error(`Resend recusou a confirmação da encomenda: ${result.error?.message || "sem ID de envio"}`);
+  }
   return result.data?.id;
 }
 
@@ -250,6 +262,9 @@ export async function sendRentalRequestEmail({
     subject: "Recebemos o teu pedido de aluguer",
     html,
   });
+  if (result.error || !result.data?.id) {
+    throw new Error(`Resend recusou o pedido de aluguer: ${result.error?.message || "sem ID de envio"}`);
+  }
   return result.data?.id;
 }
 
@@ -287,6 +302,9 @@ export async function sendRentalRejectedEmail({
     subject: "Sobre o teu pedido de aluguer",
     html,
   });
+  if (result.error || !result.data?.id) {
+    throw new Error(`Resend recusou o email de indisponibilidade: ${result.error?.message || "sem ID de envio"}`);
+  }
   return result.data?.id;
 }
 
@@ -411,6 +429,9 @@ export async function sendCompanyRentalDecisionEmail({
     subject: `Decisão necessária: aluguer de ${customerName}`,
     html,
   });
+  if (result.error || !result.data?.id) {
+    throw new Error(`Resend recusou o aviso de decisão: ${result.error?.message || "sem ID de envio"}`);
+  }
   return result.data?.id;
 }
 
@@ -459,8 +480,8 @@ export async function sendRentalPaymentEmail({
     subject: "Conclui o pagamento para confirmar a tua reserva",
     html,
   });
-  if (result.error) {
-    throw new Error(`Resend recusou o email de pagamento: ${result.error.message}`);
+  if (result.error || !result.data?.id) {
+    throw new Error(`Resend recusou o email de pagamento: ${result.error?.message || "sem ID de envio"}`);
   }
   return result.data?.id;
 }
@@ -505,6 +526,9 @@ export async function sendRentalPaidEmail({
     subject: "Pagamento confirmado — reserva TERR4",
     html,
   });
+  if (result.error || !result.data?.id) {
+    throw new Error(`Resend recusou a confirmação do aluguer: ${result.error?.message || "sem ID de envio"}`);
+  }
   return result.data?.id;
 }
 
@@ -554,6 +578,9 @@ export async function sendCompanyRentalPaidEmail({
     subject: `Aluguer pago: ${customerName}`,
     html,
   });
+  if (result.error || !result.data?.id) {
+    throw new Error(`Resend recusou o aviso de aluguer pago: ${result.error?.message || "sem ID de envio"}`);
+  }
   return result.data?.id;
 }
 
@@ -563,25 +590,53 @@ export async function sendCompanyRentalPaidEmail({
 export async function sendCompanyNewOrderEmail({
   customerName,
   customerEmail,
+  customerPhone,
+  address,
+  postalCode,
+  city,
+  country,
+  notes,
+  items,
   orderId,
   total,
 }: {
   customerName: string;
   customerEmail: string;
+  customerPhone?: string | null;
+  address?: string | null;
+  postalCode?: string | null;
+  city?: string | null;
+  country?: string | null;
+  notes?: string | null;
+  items: { name: string; quantity: number; unitCents: number }[];
   orderId: string;
   total: number;
 }) {
+  const rows = [
+    { label: "Encomenda", value: orderId },
+    { label: "Cliente", value: customerName },
+    { label: "Email", value: customerEmail },
+  ];
+  if (customerPhone) rows.push({ label: "Telefone", value: customerPhone });
+  if (address) rows.push({
+    label: "Entrega",
+    value: [address, postalCode, city, country].filter(Boolean).join(", "),
+  });
+  for (const item of items) {
+    rows.push({
+      label: `${item.quantity} × ${item.name}`,
+      value: formatEuros(item.quantity * item.unitCents),
+    });
+  }
+  rows.push({ label: "Total", value: formatEuros(total) });
+
   const html = baseEmail({
     preheader: `Nova encomenda de ${customerName}.`,
     heading: "Nova encomenda paga",
     bodyHtml: `
       <p style="margin:0 0 4px;">Foi paga uma nova encomenda na loja.</p>
-      ${detailBox([
-        { label: "Encomenda", value: orderId },
-        { label: "Cliente", value: customerName },
-        { label: "Email", value: customerEmail },
-        { label: "Total", value: formatEuros(total) },
-      ])}
+      ${detailBox(rows)}
+      ${notes ? `<p style="margin:0 0 8px;"><strong>Notas:</strong> ${escapeHtml(notes)}</p>` : ""}
       <p style="margin:0;">Prepara a encomenda e responde diretamente ao cliente se precisares de mais informações.</p>
     `,
   });
@@ -593,6 +648,9 @@ export async function sendCompanyNewOrderEmail({
     subject: `Nova encomenda: ${customerName}`,
     html,
   });
+  if (result.error || !result.data?.id) {
+    throw new Error(`Resend recusou o aviso de nova encomenda: ${result.error?.message || "sem ID de envio"}`);
+  }
   return result.data?.id;
 }
 

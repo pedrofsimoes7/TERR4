@@ -42,6 +42,7 @@ export default function CheckoutPage() {
   const formRef = useRef<HTMLFormElement>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [creatingPayment, setCreatingPayment] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const total = useMemo(() => {
     return items.reduce(
@@ -58,10 +59,16 @@ export default function CheckoutPage() {
     event.preventDefault();
     if (!formRef.current) return;
     setCreatingPayment(true);
+    setCheckoutError(null);
     const formData = new FormData(formRef.current);
-    const result = await createPaymentIntentAction(formData);
-    setClientSecret(result.clientSecret);
-    setCreatingPayment(false);
+    try {
+      const result = await createPaymentIntentAction(formData);
+      setClientSecret(result.clientSecret);
+    } catch {
+      setCheckoutError("Não foi possível preparar o pagamento. Tenta novamente dentro de alguns instantes.");
+    } finally {
+      setCreatingPayment(false);
+    }
   }
 
   if (items.length === 0 && !clientSecret) return null;
@@ -156,6 +163,11 @@ export default function CheckoutPage() {
                 >
                   {creatingPayment ? "A preparar pagamento..." : "Continuar para pagamento"}
                 </motion.button>
+                {checkoutError && (
+                  <p className="rounded-2xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                    {checkoutError}
+                  </p>
+                )}
               </form>
             ) : (
               <motion.div
@@ -240,23 +252,34 @@ function PaymentForm({ clearCart }: { clearCart: () => void }) {
   const stripe = useStripe();
   const elements = useElements();
   const [paying, setPaying] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   async function handlePayment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!stripe || !elements) return;
     setPaying(true);
+    setPaymentError(null);
     const result = await stripe.confirmPayment({
       elements,
       confirmParams: { return_url: `${appUrl}/order-confirmation` },
     });
-    if (result.error) { setPaying(false); return; }
+    if (result.error) {
+      setPaymentError(result.error.message || "O pagamento não foi concluído. Confirma os dados e tenta novamente.");
+      setPaying(false);
+      return;
+    }
     clearCart();
   }
 
   return (
     <form onSubmit={handlePayment}>
       <PaymentElement />
+      {paymentError && (
+        <p className="mt-5 rounded-2xl border border-red-300/40 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {paymentError}
+        </p>
+      )}
       <motion.button
         type="submit"
         disabled={!stripe || paying}

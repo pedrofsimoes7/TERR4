@@ -53,6 +53,7 @@ export async function POST(request: Request, { params }: RouteContext) {
   });
   if (changed.count !== 1) return redirectToDecision("unavailable");
 
+  let createdSessionId: string | null = null;
   try {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://terr4.pt";
     const session = await stripe.checkout.sessions.create({
@@ -79,9 +80,12 @@ export async function POST(request: Request, { params }: RouteContext) {
       },
       success_url: `${appUrl}/alugueres/pagamento-confirmado?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/alugueres`,
+    }, {
+      idempotencyKey: `rental-${rental.id}-${paymentExpiresAt.getTime()}`,
     });
 
     if (!session.url) throw new Error("A Stripe não devolveu um link de pagamento.");
+    createdSessionId = session.id;
 
     await prisma.rental.update({
       where: { id: rental.id },
@@ -103,10 +107,21 @@ export async function POST(request: Request, { params }: RouteContext) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("Erro ao criar pagamento do aluguer:", { rentalId: rental.id, message, error });
+    if (createdSessionId) {
+      try {
+        await stripe.checkout.sessions.expire(createdSessionId);
+      } catch (expireError) {
+        console.error("Erro ao expirar a sessão Stripe sem email:", expireError);
+      }
+    }
     try {
       await prisma.rental.update({
         where: { id: rental.id },
-        data: { status: "PENDING_APPROVAL", paymentExpiresAt: null },
+        data: {
+          status: "PENDING_APPROVAL",
+          paymentExpiresAt: null,
+          stripeCheckoutSessionId: null,
+        },
       });
     } catch (rollbackError) {
       console.error("Erro ao repor o pedido de aluguer:", rollbackError);
