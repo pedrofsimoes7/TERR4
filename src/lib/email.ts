@@ -4,7 +4,7 @@ import { resend } from "@/lib/resend";
 const ADMIN_EMAIL =
   process.env.ADMIN_EMAIL ||
   process.env.COMPANY_EMAIL ||
-  "pfs.pedrosimoes@gmail.com";
+  "terr4geral@gmail.com";
 
 const COLORS = {
   text: "#1a1714",
