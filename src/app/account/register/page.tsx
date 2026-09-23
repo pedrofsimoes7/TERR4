@@ -76,14 +76,14 @@ export default function CustomerRegisterPage() {
           </label>
 
           {/* Marketing — OPCIONAL */}
-          <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 transition hover:bg-white/[0.05]">
+          {/* <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 transition hover:bg-white/[0.05]">
             <input
               type="checkbox"
               name="marketingConsent"
               className="mt-0.5 size-4 shrink-0 accent-[#c46a2d]"
             />
            
-          </label>
+          </label> */}
 
           {state?.error && (
             <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-3">
