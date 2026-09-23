@@ -18,7 +18,7 @@ const faqs = [
   },
   {
     q: "Tem garantia?",
-    a: "Sim. A TERR4 Start tem 3 anos de garantia contra defeitos de fabrico.",
+    a: "Sim. A TERR4 Start tem 12 meses de garantia contra defeitos de fabrico.",
   },
 ];
 
