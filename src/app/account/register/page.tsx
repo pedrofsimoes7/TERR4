@@ -82,12 +82,7 @@ export default function CustomerRegisterPage() {
               name="marketingConsent"
               className="mt-0.5 size-4 shrink-0 accent-[#c46a2d]"
             />
-            <span className="text-sm leading-6 text-white/65">
-              Quero receber novidades, campanhas e promoções da TERR4 por email.
-              <span className="mt-1 block text-xs text-white/35">
-                Podes cancelar a qualquer momento. Sem spam.
-              </span>
-            </span>
+           
           </label>
 
           {state?.error && (

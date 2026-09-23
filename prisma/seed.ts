@@ -37,7 +37,7 @@ async function main() {
       name: "TERR4 Start",
       category: "Rooftop Tent",
       priceCents: 125000,
-      stock: 5,
+      stock: 999999,
       status: ProductStatus.AVAILABLE,
       shortDescription:
         "Uma tenda de tejadilho leve, resistente e prática para transformar qualquer veículo numa base confortável para explorar.",
@@ -90,7 +90,7 @@ async function main() {
       name: "TERR4 Camp Mug",
       category: "Outdoor Gear",
       priceCents: 2500,
-      stock: 20,
+      stock: 999999,
       status: ProductStatus.AVAILABLE,
       shortDescription:
         "Caneca outdoor em aço esmaltado para campismo, roadtrips e aventuras ao ar livre.",
